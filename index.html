@@ -24,7 +24,7 @@
         <span class="line l3"></span>
       </div>
 
-      <!-- favorite card renders here -->
+      <!-- Favorite card renders here -->
       <div id="featured" class="featured-wrap"></div>
 
       <!-- 3 lines on the right -->
@@ -70,6 +70,17 @@
       <div class="media">
         <div class="frame">
           <img class="card-img" src="" alt="" draggable="false" />
+
+          <!-- Audio controls live in the frame’s bottom padding -->
+          <div class="controls" role="group" aria-label="Audio controls">
+            <button class="play-btn" type="button" aria-label="Play">
+              <span class="icon icon-play" aria-hidden="true">►</span>
+              <span class="icon icon-pause" aria-hidden="true">❚❚</span>
+            </button>
+            <div class="viz" aria-hidden="true">
+              <span></span><span></span><span></span><span></span><span></span>
+            </div>
+          </div>
         </div>
       </div>
     </article>
