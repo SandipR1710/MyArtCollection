@@ -39,7 +39,8 @@ const scrollQuotesByIndex = {
 };
 
 // Footer message
-const artistMessage = "I am not a good web dev guy so please bear with it 🙂.These portraits carry a quiet piece of my peace, and I’ve tucked a song beside each one so that when you look there’s also something to hear—a small world I made for you; I hope it finds you gently, and know that I will always love you. — Sandip";
+const artistMessage =
+  "These portraits carry a quiet piece of my peace, and I’ve tucked a song beside each one so that when you look there’s also something to hear—a small world I made for you; I hope it finds you gently, and know that I will always love you. — Sandip";
 
 // ---------- ELEMENTS ----------
 const featuredWrap = document.getElementById("featured");
@@ -281,7 +282,7 @@ function setupCard(node, idx, side){
     const scrollBtn = node.querySelector(".scroll-btn");
     scrollBtn.style.display = "grid";
 
-    // 👉 Use per-card quotes first; otherwise fall back by side
+    // Use per-card quotes first; otherwise fall back by side
     const quotes = scrollQuotesByIndex[idx] || (side === "left" ? scrollQuotes.left : scrollQuotes.right);
 
     const panel = document.createElement("div");
@@ -407,7 +408,7 @@ renderGalleries();
     if (ch === ',' || ch === ';') return 140;
     if (ch === ' ') return 50;
     return 26 + Math.random()*36; // natural jitter
-    }
+  }
 
   function tick(){
     if (i <= text.length){
