@@ -73,14 +73,42 @@
 
           <!-- Audio controls live in the frame’s bottom padding -->
           <div class="controls" role="group" aria-label="Audio controls">
-            <button class="play-btn" type="button" aria-label="Play">
-              <span class="icon icon-play" aria-hidden="true">►</span>
-              <span class="icon icon-pause" aria-hidden="true">❚❚</span>
-            </button>
-            <div class="viz" aria-hidden="true">
-              <span></span><span></span><span></span><span></span><span></span>
+            <!-- Seekable bar -->
+            <div class="seek" aria-label="Seek through audio">
+              <input class="seek-range" type="range" value="0" min="0" max="100" step="0.1" aria-label="Audio position" />
+            </div>
+
+            <!-- Bottom row: button + viz + time -->
+            <div class="ctl-row">
+              <button class="play-btn" type="button" aria-label="Play">
+                <svg class="ico" viewBox="0 0 48 48" aria-hidden="true">
+                  <defs>
+                    <linearGradient id="btnGrad" x1="0" y1="0" x2="1" y2="1">
+                      <stop offset="0" stop-color="rgb(125,211,252)"/>
+                      <stop offset="1" stop-color="rgb(16,185,129)"/>
+                    </linearGradient>
+                  </defs>
+                  <circle cx="24" cy="24" r="20" class="ring"/>
+                  <g class="glyph">
+                    <polygon class="play" points="19,16 35,24 19,32"/>
+                    <rect class="pause" x="18" y="16" width="5" height="16" rx="2"/>
+                    <rect class="pause" x="27" y="16" width="5" height="16" rx="2"/>
+                  </g>
+                </svg>
+              </button>
+
+              <div class="viz" aria-hidden="true">
+                <span></span><span></span><span></span><span></span><span></span>
+              </div>
+
+              <div class="time" aria-hidden="true">
+                <span class="elapsed">0:00</span>
+                <span class="sep">/</span>
+                <span class="duration">0:00</span>
+              </div>
             </div>
           </div>
+          <!-- /controls -->
         </div>
       </div>
     </article>

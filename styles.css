@@ -9,7 +9,8 @@
   /* Mat / frame sizes */
   --frame-x: clamp(6px, 0.9vw, 10px);
   --frame-t: clamp(6px, 0.9vw, 10px);
-  --frame-b: clamp(30px, 7.5vw, 60px);
+  /* Increase bottom padding to fit seek bar + controls */
+  --frame-b: clamp(70px, 11vw, 110px);
   --frame-radius: 14px;
 
   /* Surfaces & shines */
@@ -24,7 +25,7 @@
   /* Floral dusk accents (subtle) */
   --floral-rose: 255, 163, 214;
   --floral-lav: 196, 132, 252;
-  --floral-mint: 153, 246, 228;
+  --floral-mint: 153, 246, 228);
 }
 
 * { box-sizing: border-box; }
@@ -102,7 +103,7 @@ main, header, .gallery, .card, .lightbox, .featured{ position: relative; z-index
   margin-inline: auto;
 }
 
-/* 6 white lines (3 each side) */
+/* 6 white lines */
 .side-lines{
   display: flex;
   flex-direction: column;
@@ -147,18 +148,10 @@ main, header, .gallery, .card, .lightbox, .featured{ position: relative; z-index
 
 /* ===== CENTERED GALLERY GRIDS ===== */
 .gallery{
-  --cols: 3;                          /* overridden per section below */
-  --cw: 300px;
-  --cg: clamp(40px, 6vw, 96px);
-
-  display: grid;
-  grid-template-columns: repeat(var(--cols), var(--cw));
-  column-gap: var(--cg);
-  row-gap: clamp(20px, 4.5vw, 40px);
-
-  width: max-content;                 /* shrink to content width */
-  margin-inline: auto;                /* perfectly centered */
-  justify-items: center;
+  --cols: 3; --cw: 300px; --cg: clamp(40px, 6vw, 96px);
+  display: grid; grid-template-columns: repeat(var(--cols), var(--cw));
+  column-gap: var(--cg); row-gap: clamp(20px, 4.5vw, 40px);
+  width: max-content; margin-inline: auto; justify-items: center;
 }
 
 /* A: 3 drawings */
@@ -203,8 +196,7 @@ main, header, .gallery, .card, .lightbox, .featured{ position: relative; z-index
 /* Frame-only shine */
 .frame::after{
   content: ""; position: absolute; inset: 0; border-radius: inherit; z-index: 0;
-  background:
-    radial-gradient(520px circle at var(--mx, 50%) var(--my, 50%),
+  background: radial-gradient(520px circle at var(--mx, 50%) var(--my, 50%),
       rgba(var(--frame-shine-rgb), var(--frame-shine-alpha)) 0%,
       rgba(var(--frame-shine-rgb), 0.10) 38%, transparent 56%);
   opacity: 0; transition: opacity .16s ease;
@@ -224,37 +216,93 @@ main, header, .gallery, .card, .lightbox, .featured{ position: relative; z-index
   left: calc(var(--frame-x) + 2px);
   right: calc(var(--frame-x) + 2px);
   bottom: calc(var(--frame-x) + 4px);
-  height: 40px;
-  display: flex; align-items: center; justify-content: space-between;
-  padding: 6px 10px;
-  border-radius: 10px;
+  display: flex; flex-direction: column; gap: 10px;
+  padding: 10px 12px 12px;
+  border-radius: 12px;
   background: rgba(10,14,20,.62);
   border: 1px solid rgba(255,255,255,.06);
   box-shadow: 0 6px 18px rgba(0,0,0,.35), 0 0 22px rgba(125,211,252,.08) inset;
-  z-index: 3; /* <-- add this */
+  z-index: 3;
 }
 
-/* Play/Pause button */
-.play-btn{
-  appearance: none; border: 0; cursor: pointer;
-  width: 36px; height: 28px; border-radius: 8px;
-  display: grid; place-items: center;
-  color: var(--text); background: rgba(255,255,255,.06);
-  border: 1px solid rgba(255,255,255,.10);
-  box-shadow: 0 0 0 1px rgba(255,255,255,.03) inset;
-  transition: transform .12s ease, background .12s ease, opacity .12s ease;
+/* Seek bar */
+.seek{ position: relative; height: 16px; display: grid; align-items: center; }
+.seek-range{
+  -webkit-appearance: none; appearance: none;
+  width: 100%; height: 8px; border-radius: 999px; outline: none;
+  background: linear-gradient(to right,
+    rgba(125,211,252,.95) 0%,
+    rgba(125,211,252,.95) var(--seek-pct, 0%),
+    rgba(255,255,255,.10) var(--seek-pct, 0%),
+    rgba(255,255,255,.10) 100%);
+  box-shadow: inset 0 0 0 1px rgba(255,255,255,.06), 0 1px 6px rgba(0,0,0,.45);
 }
-.play-btn:hover{ background: rgba(255,255,255,.12); transform: translateY(-1px); }
+.seek::before{
+  /* buffer track behind the range */
+  content:"";
+  position: absolute; inset: 0;
+  border-radius: 999px;
+  background: linear-gradient(to right,
+    rgba(255,255,255,.18) 0%,
+    rgba(255,255,255,.18) var(--buffer-pct, 0%),
+    transparent var(--buffer-pct, 0%));
+  pointer-events: none;
+}
+
+/* Range thumb */
+.seek-range::-webkit-slider-thumb{
+  -webkit-appearance: none; appearance: none;
+  width: 14px; height: 14px; border-radius: 50%;
+  background: #0b0f14;
+  border: 2px solid transparent;
+  box-shadow:
+    0 0 0 2px rgba(255,255,255,.12) inset,
+    0 0 0 2px rgba(125,211,252,.55),
+    0 0 18px rgba(125,211,252,.35);
+}
+.seek-range::-moz-range-thumb{
+  width: 14px; height: 14px; border: 0; border-radius: 50%;
+  background: #0b0f14;
+  box-shadow:
+    0 0 0 2px rgba(255,255,255,.12) inset,
+    0 0 0 2px rgba(125,211,252,.55),
+    0 0 18px rgba(125,211,252,.35);
+}
+
+/* Bottom row */
+.ctl-row{ display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+
+/* Time */
+.time{ display:flex; align-items:center; gap:6px; color: var(--muted); font-size: 12px; }
+.time .sep{ opacity:.6; }
+
+/* Play button (round, gradient ring) */
+.play-btn{
+  width: 42px; height: 42px; border-radius: 999px; padding: 0;
+  border: 0; cursor: pointer; background: transparent;
+  display: grid; place-items: center;
+  transition: transform .12s ease, opacity .12s ease;
+}
+.play-btn:hover{ transform: translateY(-1px); }
 .play-btn:active{ transform: translateY(0); }
-.icon{ font-size: 14px; line-height: 1; }
-.icon-pause{ display: none; }
-.playing .icon-play{ display: none; }
-.playing .icon-pause{ display: inline; }
+.play-btn .ico{ width: 42px; height: 42px; display: block; }
+.play-btn .ring{
+  fill: #0b0f14;
+  stroke: url(#btnGrad);
+  stroke-width: 2.5;
+  filter:
+    drop-shadow(0 0 10px rgba(125,211,252,.35))
+    drop-shadow(0 0 16px rgba(16,185,129,.25));
+}
+.play-btn .glyph .play{ fill: #e6edf3; }
+.play-btn.playing .glyph .play{ display: none; }
+.play-btn .glyph .pause{ fill: #e6edf3; display: none; }
+.play-btn.playing .glyph .pause{ display: block; }
 
 /* Visualizer bars */
 .viz{
   display: grid; grid-auto-flow: column; align-items: end;
-  gap: 4px; height: 18px; width: 56px;
+  gap: 4px; height: 18px; width: 60px;
 }
 .viz span{
   width: 6px; height: 6px; border-radius: 2px;
@@ -264,13 +312,11 @@ main, header, .gallery, .card, .lightbox, .featured{ position: relative; z-index
   animation: vizPulse 1s ease-in-out infinite;
   animation-play-state: paused;
 }
+.controls.playing .viz span{ animation-play-state: running; }
 .viz span:nth-child(2){ animation-delay: .1s; }
 .viz span:nth-child(3){ animation-delay: .2s; }
 .viz span:nth-child(4){ animation-delay: .3s; }
 .viz span:nth-child(5){ animation-delay: .4s; }
-
-/* run animation only when playing */
-.controls.playing .viz span{ animation-play-state: running; }
 
 @keyframes vizPulse{
   0%, 100% { transform: scaleY(.6); opacity: .9; }
@@ -285,7 +331,7 @@ main, header, .gallery, .card, .lightbox, .featured{ position: relative; z-index
   }
 }
 
-/* Lightbox */
+/* Lightbox (unchanged) */
 .lightbox{
   position: fixed; inset: 0; display: grid; place-items: center;
   padding: clamp(12px, 4vw, 40px); background: rgba(0, 0, 0, .65);
@@ -322,11 +368,11 @@ main, header, .gallery, .card, .lightbox, .featured{ position: relative; z-index
 }
 @media (max-width: 640px){
   .featured-row{ grid-template-columns: 1fr; }
-  .side-lines{ display: none; } /* keep or remove as you prefer */
+  .side-lines{ display: none; }
 
   .gallery{
     width: 100%;
-    grid-template-columns: 1fr; /* one per row */
+    grid-template-columns: 1fr;
     column-gap: 0;
     row-gap: clamp(20px, 7vw, 36px);
   }
