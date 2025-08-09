@@ -17,17 +17,14 @@
     <h2 class="section-title">FAVORITE</h2>
 
     <div class="featured-row">
-      <!-- 3 lines on the left -->
       <div class="side-lines left" aria-hidden="true">
         <span class="line l1"></span>
         <span class="line l2"></span>
         <span class="line l3"></span>
       </div>
 
-      <!-- Favorite card renders here -->
       <div id="featured" class="featured-wrap"></div>
 
-      <!-- 3 lines on the right -->
       <div class="side-lines right" aria-hidden="true">
         <span class="line l1"></span>
         <span class="line l2"></span>
@@ -36,7 +33,6 @@
     </div>
   </section>
 
-  <!-- ===== Gallery title ===== -->
   <main>
     <section class="section">
       <h2 class="section-title">GALLERY</h2>
@@ -71,24 +67,16 @@
         <div class="frame">
           <img class="card-img" src="" alt="" draggable="false" />
 
-          <!-- Audio controls live in the frame’s bottom padding -->
+          <!-- Controls in the frame’s bottom padding -->
           <div class="controls" role="group" aria-label="Audio controls">
-            <!-- Seekable bar -->
             <div class="seek" aria-label="Seek through audio">
               <input class="seek-range" type="range" value="0" min="0" max="100" step="0.1" aria-label="Audio position" />
             </div>
 
-            <!-- Bottom row: button + viz + time -->
             <div class="ctl-row">
               <button class="play-btn" type="button" aria-label="Play">
-                <!-- kept for fallback, hidden by CSS -->
+                <!-- fallback SVG (hidden by CSS) -->
                 <svg class="ico" viewBox="0 0 48 48" aria-hidden="true">
-                  <defs>
-                    <linearGradient id="btnGrad" x1="0" y1="0" x2="1" y2="1">
-                      <stop offset="0" stop-color="rgb(125,211,252)"/>
-                      <stop offset="1" stop-color="rgb(16,185,129)"/>
-                    </linearGradient>
-                  </defs>
                   <circle cx="24" cy="24" r="20" class="ring"/>
                   <g class="glyph">
                     <polygon class="play" points="19,16 35,24 19,32"/>
@@ -96,6 +84,11 @@
                     <rect class="pause" x="27" y="16" width="5" height="16" rx="2"/>
                   </g>
                 </svg>
+              </button>
+
+              <!-- Scroll trigger (only visible on last 4 cards) -->
+              <button class="scroll-btn" type="button" aria-label="Show quotes">
+                <span class="scroll-ico" aria-hidden="true"></span>
               </button>
 
               <div class="viz" aria-hidden="true">
@@ -109,7 +102,6 @@
               </div>
             </div>
           </div>
-          <!-- /controls -->
         </div>
       </div>
     </article>

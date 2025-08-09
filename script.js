@@ -16,13 +16,19 @@ const songs = [
   "I_Love_You.mp3",
   "Enna_Sona.mp3",
   "Kaun_Tujhe.mp3",
-  "Nazar_Na.mp3",
-  "O_Radhe_Radhe.mp3",
   "Humnava.mp3",
+  "O_Radhe_Radhe.mp3",
+  "Nazar_Na.mp3",
   "Tum_Hi_Ho.mp3",
 ];
 
 const allImages = [favorite, ...images];
+
+// Quotes for scrolls (edit as you want)
+const scrollQuotes = {
+  left:  ["In your eyes, calm seas.", "In your smile, I find home."],
+  right: ["Bloom softly, always.", "You are my quiet star."]
+};
 
 // ---------- ELEMENTS ----------
 const featuredWrap = document.getElementById("featured");
@@ -43,26 +49,27 @@ const prevBtn = lightbox.querySelector(".prev");
 const nextBtn = lightbox.querySelector(".next");
 
 let currentIndex = 0;
-const audioRefs = new Set(); // keep references if needed
-let currentAudio = null;     // <-- track the one that's playing
+const audioRefs = new Set();
+let currentAudio = null; // ensure only one plays
 
 // ---------- RENDER ----------
 function renderFeatured(){
   const node = tpl.content.firstElementChild.cloneNode(true);
-  setupCard(node, 0);
+  setupCard(node, 0, null);
   featuredWrap.appendChild(node);
 }
 function renderGalleries(){
   const groups = [
-    { el: g1, items: images.slice(0, 3), offset: 1 },
-    { el: g2, items: images.slice(3, 5), offset: 1 + 3 },
-    { el: g3, items: images.slice(5, 7), offset: 1 + 5 }
+    { el: g1, items: images.slice(0, 3), offset: 1, sides: [] },
+    { el: g2, items: images.slice(3, 5), offset: 1 + 3, sides: ["left","right"] },
+    { el: g3, items: images.slice(5, 7), offset: 1 + 5, sides: ["left","right"] }
   ];
   groups.forEach(group => {
     group.items.forEach((_, j) => {
       const node = tpl.content.firstElementChild.cloneNode(true);
       const idx = group.offset + j;
-      setupCard(node, idx);
+      const side = group.sides[j] || null; // last 4 cards get side
+      setupCard(node, idx, side);
       group.el.appendChild(node);
     });
   });
@@ -76,9 +83,18 @@ const fmt = (s) => {
   const r = s % 60;
   return `${m}:${r.toString().padStart(2,"0")}`;
 };
+function closeAllScrolls(except){
+  document.querySelectorAll(".scroll-panel.open").forEach(p => {
+    if (p !== except){
+      p.classList.remove("open");
+      p.classList.add("closing");
+      setTimeout(() => p.classList.remove("closing"), 420);
+    }
+  });
+}
 
 // ---------- CARD SETUP ----------
-function setupCard(node, idx){
+function setupCard(node, idx, side){
   const img = node.querySelector(".card-img");
   const frame = node.querySelector(".frame");
   const controls = node.querySelector(".controls");
@@ -86,6 +102,7 @@ function setupCard(node, idx){
   const range = node.querySelector(".seek-range");
   const elaps = node.querySelector(".elapsed");
   const dur = node.querySelector(".duration");
+  const media = node.querySelector(".media");
 
   const { src, alt } = allImages[idx];
   img.src = src;
@@ -95,19 +112,17 @@ function setupCard(node, idx){
 
   // Create audio element
   const audio = new Audio(songs[idx] || "");
-  audio.preload = "metadata"; // so duration is available
-  audio.loop = true;          // <-- loop this track
+  audio.preload = "metadata";
+  audio.loop = true; // loop track by default
   audioRefs.add(audio);
 
   // Prevent lightbox on controls interaction
   const stop = (e) => e.stopPropagation();
-  ["pointerdown", "click", "touchstart"].forEach(ev =>
-    controls.addEventListener(ev, stop, { passive: ev === "touchstart" })
-  );
-  ["pointerdown", "click", "touchstart"].forEach(ev => {
-    range.addEventListener(ev, stop, { passive: ev === "touchstart" });
-    btn.addEventListener(ev, stop, { passive: ev === "touchstart" });
-  });
+  ["pointerdown","click"].forEach(ev => controls.addEventListener(ev, stop));
+  controls.addEventListener("touchstart", stop, { passive: true });
+  ["pointerdown","click"].forEach(ev => range.addEventListener(ev, stop));
+  range.addEventListener("touchstart", stop, { passive: true });
+  btn.addEventListener("pointerdown", stop);
 
   // Play/Pause UI
   const setUI = (on) => {
@@ -119,21 +134,16 @@ function setupCard(node, idx){
   // Toggle play/pause
   btn.addEventListener("click", () => {
     if (!audio.src) return;
-
     if (audio.paused) {
-      // pause any other currently playing audio
       if (currentAudio && currentAudio !== audio) currentAudio.pause();
-
       currentAudio = audio;
-      audio.play().then(() => setUI(true)).catch(() => {});
+      audio.play().then(() => setUI(true)).catch(()=>{});
     } else {
       audio.pause();
       setUI(false);
       if (currentAudio === audio) currentAudio = null;
     }
   });
-
-  // Keyboard on the button
   btn.addEventListener("keydown", (e) => {
     if (e.key === "Enter" || e.key === " ") { e.preventDefault(); e.stopPropagation(); btn.click(); }
   });
@@ -143,7 +153,6 @@ function setupCard(node, idx){
     dur.textContent = fmt(audio.duration);
     range.max = audio.duration || 0;
   });
-
   audio.addEventListener("timeupdate", () => {
     elaps.textContent = fmt(audio.currentTime);
     if (!range.matches(":active")) {
@@ -152,8 +161,6 @@ function setupCard(node, idx){
       range.style.setProperty("--seek-pct", `${pct}%`);
     }
   });
-
-  // update buffered amount (for the faint track behind)
   audio.addEventListener("progress", () => {
     try {
       const b = audio.buffered;
@@ -163,17 +170,8 @@ function setupCard(node, idx){
       }
     } catch {}
   });
-
-  // Keep UI in sync with actual audio state
-  audio.addEventListener("play", () => {
-    currentAudio = audio;
-    setUI(true);
-  });
-  audio.addEventListener("pause", () => {
-    setUI(false);
-    if (currentAudio === audio) currentAudio = null;
-  });
-  // loop is handled by audio.loop=true; no "ended" stop
+  audio.addEventListener("play", () => { currentAudio = audio; setUI(true); });
+  audio.addEventListener("pause", () => { setUI(false); if (currentAudio === audio) currentAudio = null; });
 
   // Seeking
   const updateSeekFill = () => {
@@ -185,17 +183,60 @@ function setupCard(node, idx){
     audio.currentTime = Number(range.value || 0);
     elaps.textContent = fmt(audio.currentTime);
   });
-  range.addEventListener("change", () => {
-    audio.currentTime = Number(range.value || 0);
-  });
+  range.addEventListener("change", () => { audio.currentTime = Number(range.value || 0); });
 
-  // Lightbox (only when not clicking controls)
+  // ---- SCROLL (last 4 cards only) ----
+  if (side){
+    node.classList.add("with-scroll");
+
+    const scrollBtn = node.querySelector(".scroll-btn");
+    scrollBtn.style.display = "grid";
+
+    const quotes = side === "left" ? scrollQuotes.left : scrollQuotes.right;
+    const panel = document.createElement("div");
+    panel.className = "scroll-panel";
+    panel.dataset.side = side;
+    panel.innerHTML = `
+      <div class="scroll-body">
+        <p class="quote">${quotes[0]}</p>
+        <p class="quote">${quotes[1]}</p>
+      </div>
+    `;
+    media.appendChild(panel);
+
+    const togglePanel = () => {
+      if (panel.classList.contains("open")){
+        panel.classList.remove("open");
+        panel.classList.add("closing");
+        setTimeout(() => panel.classList.remove("closing"), 420);
+      } else {
+        closeAllScrolls(panel);
+        panel.classList.remove("closing");
+        panel.classList.add("open");
+      }
+    };
+
+    const stopScroll = (e) => e.stopPropagation();
+    panel.addEventListener("pointerdown", stopScroll);
+    panel.addEventListener("click", stopScroll);
+    panel.addEventListener("touchstart", stopScroll, { passive: true });
+
+    scrollBtn.addEventListener("click", (e) => { e.stopPropagation(); togglePanel(); });
+    scrollBtn.addEventListener("keydown", (e) => {
+      if (e.key === "Enter" || e.key === " "){ e.preventDefault(); e.stopPropagation(); togglePanel(); }
+    });
+  } else {
+    const sb = node.querySelector(".scroll-btn");
+    if (sb) sb.style.display = "none";
+  }
+
+  // Lightbox (ignore clicks on controls/scroll)
   node.addEventListener("click", (e) => {
-    if (e.target.closest(".controls")) return;
+    if (e.target.closest(".controls") || e.target.closest(".scroll-panel")) return;
     openLightbox(idx);
   });
   node.addEventListener("keydown", (e) => {
-    if (e.target.closest(".controls")) return;
+    if (e.target.closest(".controls") || e.target.closest(".scroll-panel")) return;
     if (e.key === "Enter" || e.key === " ") { e.preventDefault(); openLightbox(idx); }
   });
 }
@@ -217,8 +258,6 @@ function addTilt(el){
     el.style.setProperty("--mx", `${x}px`);
     el.style.setProperty("--my", `${y}px`);
     el.style.transform = `perspective(900px) rotateX(${rx}deg) rotateY(${ry}deg)`;
-    const shineStrength = Math.min(1, Math.hypot(px, py) * 3);
-    el.style.setProperty("--shine", shineStrength.toFixed(2));
   });
   el.addEventListener("pointerleave", reset);
   el.addEventListener("pointercancel", reset);
