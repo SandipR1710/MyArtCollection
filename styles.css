@@ -353,24 +353,16 @@ main, header, .gallery, .card, .lightbox, .featured{ position: relative; z-index
   gap: clamp(16px, 5vw, 48px);
   padding-inline: clamp(12px, 3vw, 24px);
 }
-/* smaller artist card */
 .artist-card{ width: clamp(160px, 22vw, 220px); }
 .artist-card .frame{ padding-bottom: var(--frame-x); }
-
-/* Artist words */
 .artist-words{
   position: relative;
   font-size: clamp(16px, 1.8vw, 20px);
   color: var(--text);
   max-width: 800px;
 }
-.typed{
-  margin: 0;
-  min-height: 1.2em;
-  letter-spacing: .01em;
-  text-shadow: 0 1px 0 rgba(0,0,0,.25);
-}
-/* Ensure any stray caret is hidden */
+.typed{ margin: 0; min-height: 1.2em; letter-spacing: .01em; text-shadow: 0 1px 0 rgba(0,0,0,.25); }
+/* Hide caret */
 .caret{ display:none !important; }
 
 /* Responsive */
@@ -397,6 +389,28 @@ main, header, .gallery, .card, .lightbox, .featured{ position: relative; z-index
 
   .scroll-panel{ width: clamp(180px, 70vw, 260px); }
 }
+
+/* iPhone 15-ish widths: favorite slightly larger than other cards */
+@media (max-width: 480px){
+  .featured-wrap{
+    width: clamp(260px, 80vw, 480px);
+  }
+  .gallery{
+    width: max-content;
+    grid-template-columns: repeat(1, var(--cw-m, clamp(220px, 72vw, 360px)));
+    column-gap: 0;
+    row-gap: clamp(18px, 6vw, 28px);
+    margin-inline: auto;
+    justify-items: center;
+  }
+  #gallery-1, #gallery-2, #gallery-3{
+    --cw-m: clamp(210px, 70vw, 340px); /* ~10% smaller than favorite */
+  }
+  .scroll-panel{
+    width: clamp(200px, 74vw, 280px);
+  }
+}
+
 @media (prefers-reduced-motion: reduce){
   .frame, .frame::after, .lightbox{ transition: none !important; }
   .viz span{ transition: none !important; animation: none !important; }
