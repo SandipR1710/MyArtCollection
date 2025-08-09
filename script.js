@@ -14,12 +14,12 @@ const images = [
 const songs = [
   "Kahani_Suno_2.0.mp3",
   "I_Love_You.mp3",
-  "audio/img2.mp3",
-  "audio/img3.mp3",
-  "audio/img4.mp3",
+  "Enna_Sona.mp3",
+  "Kaun_Tujhe.mp3",
+  "Nazar_Na.mp3",
   "O_Radhe_Radhe.mp3",
-  "audio/img6.mp3",
-  "audio/img8.mp3",
+  "Humnava.mp3",
+  "Tum_Hi_Ho.mp3",
 ];
 
 const allImages = [favorite, ...images];
@@ -43,7 +43,8 @@ const prevBtn = lightbox.querySelector(".prev");
 const nextBtn = lightbox.querySelector(".next");
 
 let currentIndex = 0;
-const audioRefs = new Set(); // to pause others when one plays
+const audioRefs = new Set(); // keep references if needed
+let currentAudio = null;     // <-- track the one that's playing
 
 // ---------- RENDER ----------
 function renderFeatured(){
@@ -83,7 +84,6 @@ function setupCard(node, idx){
   const controls = node.querySelector(".controls");
   const btn = node.querySelector(".play-btn");
   const range = node.querySelector(".seek-range");
-  const timeEl = node.querySelector(".time");
   const elaps = node.querySelector(".elapsed");
   const dur = node.querySelector(".duration");
 
@@ -96,35 +96,44 @@ function setupCard(node, idx){
   // Create audio element
   const audio = new Audio(songs[idx] || "");
   audio.preload = "metadata"; // so duration is available
+  audio.loop = true;          // <-- loop this track
   audioRefs.add(audio);
 
   // Prevent lightbox on controls interaction
   const stop = (e) => e.stopPropagation();
-  controls.addEventListener("pointerdown", stop);
-  controls.addEventListener("click", stop);
-  controls.addEventListener("touchstart", stop, { passive: true });
-  range.addEventListener("pointerdown", stop);
-  range.addEventListener("click", stop);
-  range.addEventListener("touchstart", stop, { passive: true });
-  btn.addEventListener("pointerdown", stop);
+  ["pointerdown", "click", "touchstart"].forEach(ev =>
+    controls.addEventListener(ev, stop, { passive: ev === "touchstart" })
+  );
+  ["pointerdown", "click", "touchstart"].forEach(ev => {
+    range.addEventListener(ev, stop, { passive: ev === "touchstart" });
+    btn.addEventListener(ev, stop, { passive: ev === "touchstart" });
+  });
 
-  // Play/Pause
+  // Play/Pause UI
   const setUI = (on) => {
     controls.classList.toggle("playing", on);
     btn.classList.toggle("playing", on);
     btn.setAttribute("aria-label", on ? "Pause" : "Play");
   };
+
+  // Toggle play/pause
   btn.addEventListener("click", () => {
     if (!audio.src) return;
+
     if (audio.paused) {
-      audioRefs.forEach(a => { if (a !== audio && !a.paused) a.pause(); });
-      audio.play().catch(()=>{});
-      setUI(true);
+      // pause any other currently playing audio
+      if (currentAudio && currentAudio !== audio) currentAudio.pause();
+
+      currentAudio = audio;
+      audio.play().then(() => setUI(true)).catch(() => {});
     } else {
       audio.pause();
       setUI(false);
+      if (currentAudio === audio) currentAudio = null;
     }
   });
+
+  // Keyboard on the button
   btn.addEventListener("keydown", (e) => {
     if (e.key === "Enter" || e.key === " ") { e.preventDefault(); e.stopPropagation(); btn.click(); }
   });
@@ -134,14 +143,17 @@ function setupCard(node, idx){
     dur.textContent = fmt(audio.duration);
     range.max = audio.duration || 0;
   });
+
   audio.addEventListener("timeupdate", () => {
     elaps.textContent = fmt(audio.currentTime);
-    if (!range.matches(":active")) { // don't fight the user while dragging
+    if (!range.matches(":active")) {
       range.value = audio.currentTime || 0;
       const pct = audio.duration ? (audio.currentTime / audio.duration) * 100 : 0;
       range.style.setProperty("--seek-pct", `${pct}%`);
     }
   });
+
+  // update buffered amount (for the faint track behind)
   audio.addEventListener("progress", () => {
     try {
       const b = audio.buffered;
@@ -151,9 +163,17 @@ function setupCard(node, idx){
       }
     } catch {}
   });
-  audio.addEventListener("ended", () => setUI(false));
-  audio.addEventListener("pause", () => setUI(false));
-  audio.addEventListener("play", () => setUI(true));
+
+  // Keep UI in sync with actual audio state
+  audio.addEventListener("play", () => {
+    currentAudio = audio;
+    setUI(true);
+  });
+  audio.addEventListener("pause", () => {
+    setUI(false);
+    if (currentAudio === audio) currentAudio = null;
+  });
+  // loop is handled by audio.loop=true; no "ended" stop
 
   // Seeking
   const updateSeekFill = () => {
