@@ -8,8 +8,8 @@
 </head>
 <body>
   <header class="site-header">
-    <h1>Her Portraits</h1>
-    <p class="subtitle">Dark, calm gallery with a framed glow ✨</p>
+    <h1>HER POTRAITS</h1>
+    <p class="subtitle">For the most important person in my life 🌟</p>
   </header>
 
   <!-- ===== Featured (purple glow) ===== -->
@@ -74,17 +74,7 @@
             </div>
 
             <div class="ctl-row">
-              <button class="play-btn" type="button" aria-label="Play">
-                <!-- fallback SVG (hidden by CSS) -->
-                <svg class="ico" viewBox="0 0 48 48" aria-hidden="true">
-                  <circle cx="24" cy="24" r="20" class="ring"/>
-                  <g class="glyph">
-                    <polygon class="play" points="19,16 35,24 19,32"/>
-                    <rect class="pause" x="18" y="16" width="5" height="16" rx="2"/>
-                    <rect class="pause" x="27" y="16" width="5" height="16" rx="2"/>
-                  </g>
-                </svg>
-              </button>
+              <button class="play-btn" type="button" aria-label="Play"></button>
 
               <!-- Scroll trigger (only visible on last 4 cards) -->
               <button class="scroll-btn" type="button" aria-label="Show quotes">
@@ -114,6 +104,28 @@
     <img id="lightbox-img" src="" alt="">
     <button class="nav next" aria-label="Next">&#10095;</button>
   </div>
+
+  <!-- ===== Footer: Artist note ===== -->
+  <footer class="site-footer">
+    <h2 class="section-title">WORDS FROM THE ARTIST FOR YOU</h2>
+
+    <div class="footer-inner">
+      <!-- Small artist card (no controls/lightbox) -->
+      <article class="card artist-card">
+        <div class="media">
+          <div class="frame">
+            <img class="card-img" src="Artist.JPG" alt="Artist portrait" draggable="false" />
+          </div>
+        </div>
+      </article>
+
+      <!-- Animated text -->
+      <div class="artist-words">
+        <p id="artist-typed" class="typed" aria-live="polite"></p>
+        <span class="caret" aria-hidden="true"></span>
+      </div>
+    </div>
+  </footer>
 
   <script src="script.js"></script>
 </body>

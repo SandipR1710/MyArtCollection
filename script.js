@@ -24,11 +24,22 @@ const songs = [
 
 const allImages = [favorite, ...images];
 
-// Quotes for scrolls (edit as you want)
+// Default quote pools (fallback if per-card not provided)
 const scrollQuotes = {
   left:  ["In your eyes, calm seas.", "In your smile, I find home."],
   right: ["Bloom softly, always.", "You are my quiet star."]
 };
+
+// ✅ Unique quotes per card index (last 4 cards are idx 4..7)
+const scrollQuotesByIndex = {
+  4: ["You arrived like quiet rain.", "My storms learned to rest."],        // Section B, LEFT
+  5: ["Moonlight learns your name.", "Softly, the night agrees."],          // Section B, RIGHT
+  6: ["When you breathe, rooms soften.", "Even clocks keep gentler time."], // Section C, LEFT
+  7: ["Every street hums lighter.", "You fold distance into nearness."]     // Section C, RIGHT
+};
+
+// Footer message
+const artistMessage = "I am not a good web dev guy so please bear with it 🙂.These portraits carry a quiet piece of my peace, and I’ve tucked a song beside each one so that when you look there’s also something to hear—a small world I made for you; I hope it finds you gently, and know that I will always love you. — Sandip";
 
 // ---------- ELEMENTS ----------
 const featuredWrap = document.getElementById("featured");
@@ -93,7 +104,7 @@ function useVisualizer(audio, vizEl, controls){
     try{
       const src = audioCtx.createMediaElementSource(audio);
       const analyser = audioCtx.createAnalyser();
-      analyser.fftSize = 64;
+      analyser.fftSize = 64; // smooth bars
       src.connect(analyser);
       analyser.connect(audioCtx.destination);
       analyserByAudio.set(audio, { src, analyser });
@@ -144,7 +155,7 @@ function renderGalleries(){
     group.items.forEach((_, j) => {
       const node = tpl.content.firstElementChild.cloneNode(true);
       const idx = group.offset + j;
-      const side = group.sides[j] || null; // last 4 cards get side
+      const side = group.sides[j] || null; // last 4 cards get side (for panel direction)
       setupCard(node, idx, side);
       group.el.appendChild(node);
     });
@@ -159,16 +170,6 @@ const fmt = (s) => {
   const r = s % 60;
   return `${m}:${r.toString().padStart(2,"0")}`;
 };
-function closeAllScrolls(except){
-  // kept for compatibility; no longer used to enforce single-open behavior
-  document.querySelectorAll(".scroll-panel.open").forEach(p => {
-    if (p !== except){
-      p.classList.remove("open");
-      p.classList.add("closing");
-      setTimeout(() => p.classList.remove("closing"), 420);
-    }
-  });
-}
 
 // ---------- CARD SETUP ----------
 function setupCard(node, idx, side){
@@ -254,9 +255,7 @@ function setupCard(node, idx, side){
       }
     } catch {}
   });
-  audio.addEventListener("play", () => {
-    setUI(true);
-  });
+  audio.addEventListener("play", () => { setUI(true); });
   audio.addEventListener("pause", () => {
     setUI(false);
     if (currentAudio === audio) currentAudio = null;
@@ -282,7 +281,9 @@ function setupCard(node, idx, side){
     const scrollBtn = node.querySelector(".scroll-btn");
     scrollBtn.style.display = "grid";
 
-    const quotes = side === "left" ? scrollQuotes.left : scrollQuotes.right;
+    // 👉 Use per-card quotes first; otherwise fall back by side
+    const quotes = scrollQuotesByIndex[idx] || (side === "left" ? scrollQuotes.left : scrollQuotes.right);
+
     const panel = document.createElement("div");
     panel.className = "scroll-panel";
     panel.dataset.side = side;
@@ -294,10 +295,7 @@ function setupCard(node, idx, side){
     `;
     media.appendChild(panel);
 
-    // ✅ Keep panels open on page load (animate in)
-    requestAnimationFrame(() => panel.classList.add("open"));
-
-    // ✅ Allow MULTIPLE panels open at once
+    // Button controls opening/closing; multiple panels allowed; NOT opened on load
     const togglePanel = () => {
       if (panel.classList.contains("open")){
         panel.classList.remove("open");
@@ -390,3 +388,34 @@ lightbox.addEventListener("click", (e) => { if (e.target === lightbox) closeLigh
 // ---------- INIT ----------
 renderFeatured();
 renderGalleries();
+
+/* ===== Footer typewriter ===== */
+(function runTypewriter(){
+  const el = document.getElementById('artist-typed');
+  if (!el) return;
+
+  if (prefersReduced){
+    el.textContent = artistMessage;
+    return;
+  }
+
+  const text = artistMessage;
+  let i = 0;
+
+  function nextDelay(ch){
+    if (ch === '.' || ch === '!' || ch === '?') return 220;
+    if (ch === ',' || ch === ';') return 140;
+    if (ch === ' ') return 50;
+    return 26 + Math.random()*36; // natural jitter
+    }
+
+  function tick(){
+    if (i <= text.length){
+      el.textContent = text.slice(0, i);
+      const ch = text[i-1] || '';
+      setTimeout(() => requestAnimationFrame(tick), nextDelay(ch));
+      i++;
+    }
+  }
+  tick();
+})();

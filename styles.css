@@ -5,28 +5,34 @@
   --muted: #9aa6b2;
   --glow-alpha: 0.12;
 
+  /* Mat / frame sizes */
   --frame-x: clamp(6px, 0.9vw, 10px);
   --frame-t: clamp(6px, 0.9vw, 10px);
   --frame-b: clamp(70px, 11vw, 110px);
   --frame-radius: 14px;
 
+  /* Frame look */
   --frame-bg: #0e151f;
   --frame-shine-rgb: 125, 211, 252;
   --frame-shine-alpha: 0.22;
 
+  /* Border gradient for frames */
   --gallery-ring-1: rgba(56,189,248,.95);
   --gallery-ring-2: rgba(16,185,129,.95);
 
+  /* Ambient floral tints */
   --floral-rose: 255, 163, 214;
   --floral-lav: 196, 132, 252;
   --floral-mint: 153, 246, 228;
 
+  /* gap from frame edge to scroll panel */
   --scroll-gap: clamp(14px, 2vw, 24px);
 
-  /* Quotes */
+  /* Quotes theme */
   --quote-fg: #eaf2ff;
   --quote-ink: rgba(234,242,255,.85);
 }
+
 * { box-sizing: border-box; }
 html, body { height: 100%; }
 
@@ -123,7 +129,11 @@ main, header, .gallery, .card, .lightbox, .featured{ position: relative; z-index
 }
 .frame.hovering::after{ opacity:1; }
 
-.card-img{ position:relative; z-index:1; display:block; width:100%; aspect-ratio: 4 / 5; object-fit: cover; border-radius: var(--frame-radius); filter: saturate(.97) contrast(1.05); user-select: none; }
+.card-img{
+  position:relative; z-index:1; display:block; width:100%;
+  aspect-ratio: 4 / 5; object-fit: cover; border-radius: var(--frame-radius);
+  filter: saturate(.97) contrast(1.05); user-select: none;
+}
 
 /* Controls */
 .controls{
@@ -228,7 +238,7 @@ main, header, .gallery, .card, .lightbox, .featured{ position: relative; z-index
 .scroll-panel[data-side="right"]::before{ left: 100%; margin-left: 8px; }
 .scroll-panel[data-side="right"]::after{  right: 100%; margin-right: -9px; width:14px; opacity:.6; }
 
-/* Quotes inside the scroll */
+/* Nicer quotes inside the scroll */
 .scroll-body{ display:flex; flex-direction:column; gap:10px; }
 .scroll-body .quote{
   margin:0;
@@ -258,7 +268,6 @@ main, header, .gallery, .card, .lightbox, .featured{ position: relative; z-index
   color: color-mix(in srgb, var(--quote-fg) 70%, #8fb7ff);
   opacity:.9;
 }
-
 /* direction slide preservation */
 .scroll-panel[data-side="left"]  .quote{ --slide:  8px; transform: translateX(var(--slide)); }
 .scroll-panel[data-side="right"] .quote{ --slide: -8px; transform: translateX(var(--slide)); }
@@ -317,12 +326,65 @@ main, header, .gallery, .card, .lightbox, .featured{ position: relative; z-index
 .nav:hover{ background:rgba(18,24,33,.88); }
 .nav.prev{ left: clamp(8px, 3vw, 24px); } .nav.next{ right: clamp(8px, 3vw, 24px); }
 
+/* ===== Footer ===== */
+.site-footer{
+  padding: clamp(28px, 6vw, 72px) 0 clamp(36px, 8vw, 90px);
+}
+.footer-inner{
+  max-width: 1100px;
+  margin: 0 auto;
+  display: grid;
+  grid-template-columns: auto 1fr;
+  align-items: center;
+  gap: clamp(16px, 5vw, 48px);
+  padding-inline: clamp(12px, 3vw, 24px);
+}
+/* smaller artist card */
+.artist-card{
+  width: clamp(160px, 22vw, 220px);
+}
+.artist-card .frame{
+  padding-bottom: var(--frame-x); /* tighter bottom (no controls) */
+}
+/* Artist words + typewriter */
+.artist-words{
+  position: relative;
+  font-size: clamp(16px, 1.8vw, 20px);
+  color: var(--text);
+  max-width: 800px;
+}
+.typed{
+  margin: 0;
+  min-height: 1.2em;
+  letter-spacing: .01em;
+  text-shadow: 0 1px 0 rgba(0,0,0,.25);
+}
+.caret{
+  display: inline-block;
+  width: 2px;
+  height: 1em;
+  background: rgba(240,246,255,.9);
+  margin-left: 4px;
+  vertical-align: -2px;
+  box-shadow: 0 0 8px rgba(125,211,252,.55);
+  animation: blink .9s step-end infinite;
+}
+@keyframes blink{ 50%{ opacity: 0; } }
+
 /* Responsive */
 @media (max-width: 1024px){
   .featured-row{ max-width: 1000px; }
   #gallery-1{ --cols: 2; --cw: clamp(240px, 36vw, 320px); }
   #gallery-2{ --cols: 2; --cw: clamp(260px, 38vw, 340px); }
   #gallery-3{ --cols: 2; --cw: clamp(270px, 40vw, 350px); }
+}
+@media (max-width: 720px){
+  .footer-inner{
+    grid-template-columns: 1fr;
+    justify-items: center;
+    text-align: center;
+  }
+  .artist-words{ max-width: 90ch; }
 }
 @media (max-width: 640px){
   .featured-row{ grid-template-columns: 1fr; }
