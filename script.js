@@ -1,16 +1,29 @@
-// Replace with your own image paths (4:5 if possible)
-const images = [
+// ---------- DATA ----------
+// Set your favorite drawing here:
+const favorite = {
+    src: "img7.jpeg",      // <-- change to your favorite drawing path
+    alt: "Favorite portrait"
+  };
+  
+  // Other drawings (7 left)
+  const images = [
     { src: "img1.jpeg", alt: "Portrait 1" },
     { src: "img2.jpeg", alt: "Portrait 1" },
     { src: "img3.jpeg", alt: "Portrait 1" },
     { src: "img4.jpeg", alt: "Portrait 1" },
     { src: "img5.jpeg", alt: "Portrait 1" },
     { src: "img6.jpeg", alt: "Portrait 1" },
-    { src: "img7.jpeg", alt: "Portrait 1" },
     { src: "img8.jpeg", alt: "Portrait 1" },
   ];
   
-  const galleryEl = document.getElementById("gallery");
+  // For the lightbox (favorite first)
+  const allImages = [favorite, ...images];
+  
+  // ---------- ELEMENTS ----------
+  const featuredWrap = document.getElementById("featured");
+  const g1 = document.getElementById("gallery-1");
+  const g2 = document.getElementById("gallery-2");
+  const g3 = document.getElementById("gallery-3");
   const tpl = document.getElementById("card-template");
   
   // Feature flags
@@ -26,30 +39,64 @@ const images = [
   
   let currentIndex = 0;
   
-  function renderGallery(){
-    images.forEach((item, i) => {
-      const node = tpl.content.firstElementChild.cloneNode(true);
-      const img = node.querySelector(".card-img");
-      const frame = node.querySelector(".frame");
+  // ---------- RENDER ----------
+  function renderFeatured(){
+    const node = tpl.content.firstElementChild.cloneNode(true);
+    const img = node.querySelector(".card-img");
+    const frame = node.querySelector(".frame");
   
-      img.src = item.src;
-      img.alt = item.alt || `Artwork ${i+1}`;
+    img.src = favorite.src;
+    img.alt = favorite.alt || "Favorite artwork";
   
-      if (supportsHover && !prefersReduced) addTilt(frame);
+    if (supportsHover && !prefersReduced) addTilt(frame);
   
-      // Open lightbox on click / keyboard (on the whole card)
-      node.addEventListener("click", () => openLightbox(i));
-      node.addEventListener("keydown", (e) => {
-        if (e.key === "Enter" || e.key === " ") {
-          e.preventDefault();
-          openLightbox(i);
-        }
+    // Open lightbox at index 0
+    node.addEventListener("click", () => openLightbox(0));
+    node.addEventListener("keydown", (e) => {
+      if (e.key === "Enter" || e.key === " ") {
+        e.preventDefault();
+        openLightbox(0);
+      }
+    });
+  
+    featuredWrap.appendChild(node);
+  }
+  
+  function renderGalleries(){
+    // Split into 3 groups: 3, 2, 2
+    const groups = [
+      { el: g1, items: images.slice(0, 3), offset: 1 },
+      { el: g2, items: images.slice(3, 5), offset: 1 + 3 },
+      { el: g3, items: images.slice(5, 7), offset: 1 + 5 }
+    ];
+  
+    groups.forEach(group => {
+      group.items.forEach((item, j) => {
+        const node = tpl.content.firstElementChild.cloneNode(true);
+        const img = node.querySelector(".card-img");
+        const frame = node.querySelector(".frame");
+  
+        img.src = item.src;
+        img.alt = item.alt || "Artwork";
+  
+        if (supportsHover && !prefersReduced) addTilt(frame);
+  
+        // Lightbox index in the combined array (favorite at 0)
+        const idx = group.offset + j;
+        node.addEventListener("click", () => openLightbox(idx));
+        node.addEventListener("keydown", (e) => {
+          if (e.key === "Enter" || e.key === " ") {
+            e.preventDefault();
+            openLightbox(idx);
+          }
+        });
+  
+        group.el.appendChild(node);
       });
-  
-      galleryEl.appendChild(node);
     });
   }
   
+  // ---------- INTERACTION ----------
   function addTilt(el){
     const maxTilt = 6; // degrees
     const reset = () => {
@@ -75,7 +122,6 @@ const images = [
       el.style.setProperty("--my", `${y}px`);
       el.style.transform = `perspective(900px) rotateX(${rx}deg) rotateY(${ry}deg)`;
   
-      // stronger shine reaction near edges
       const shineStrength = Math.min(1, Math.hypot(px, py) * 3);
       el.style.setProperty("--shine", shineStrength.toFixed(2));
     });
@@ -84,7 +130,7 @@ const images = [
     el.addEventListener("pointercancel", reset);
   }
   
-  /* Lightbox */
+  // Lightbox
   function openLightbox(index){
     currentIndex = index;
     updateLightbox();
@@ -103,16 +149,16 @@ const images = [
     else if (e.key === "ArrowLeft") prev();
   }
   function updateLightbox(){
-    const { src, alt } = images[currentIndex];
+    const { src, alt } = allImages[currentIndex];
     lightboxImg.src = src;
     lightboxImg.alt = alt || `Artwork ${currentIndex+1}`;
   }
   function next(){
-    currentIndex = (currentIndex + 1) % images.length;
+    currentIndex = (currentIndex + 1) % allImages.length;
     updateLightbox();
   }
   function prev(){
-    currentIndex = (currentIndex - 1 + images.length) % images.length;
+    currentIndex = (currentIndex - 1 + allImages.length) % allImages.length;
     updateLightbox();
   }
   
@@ -123,5 +169,7 @@ const images = [
     if (e.target === lightbox) closeLightbox();
   });
   
-  renderGallery();
+  // Init
+  renderFeatured();
+  renderGalleries();
   

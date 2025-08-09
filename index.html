@@ -1,11 +1,9 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="utf-8" />
+  <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Her Portraits — Gallery</title>
-
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap" rel="stylesheet">
+  <title>Her Portraits</title>
   <link rel="stylesheet" href="styles.css" />
 </head>
 <body>
@@ -14,8 +12,53 @@
     <p class="subtitle">Dark, calm gallery with a framed glow ✨</p>
   </header>
 
+  <!-- ===== Featured (purple glow) ===== -->
+  <section class="section featured">
+    <h2 class="section-title">FAVORITE</h2>
+
+    <div class="featured-row">
+      <div class="side-lines left" aria-hidden="true">
+        <span class="line l1"></span>
+        <span class="line l2"></span>
+        <span class="line l3"></span>
+      </div>
+
+      <div id="featured" class="featured-wrap"></div>
+
+      <div class="side-lines right" aria-hidden="true">
+        <span class="line l1"></span>
+        <span class="line l2"></span>
+        <span class="line l3"></span>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== Gallery title ===== -->
   <main>
-    <section id="gallery" class="gallery" aria-live="polite"></section>
+    <section class="section">
+      <h2 class="section-title">GALLERY</h2>
+    </section>
+
+    <!-- ===== Themed Section A (3 pics) ===== -->
+    <section class="themed themed--a">
+      <div class="themed-inner">
+        <div id="gallery-1" class="gallery" aria-label="Section A (3 drawings)"></div>
+      </div>
+    </section>
+
+    <!-- ===== Themed Section B (2 pics) ===== -->
+    <section class="themed themed--b">
+      <div class="themed-inner">
+        <div id="gallery-2" class="gallery" aria-label="Section B (2 drawings)"></div>
+      </div>
+    </section>
+
+    <!-- ===== Themed Section C (2 pics) ===== -->
+    <section class="themed themed--c">
+      <div class="themed-inner">
+        <div id="gallery-3" class="gallery" aria-label="Section C (2 drawings)"></div>
+      </div>
+    </section>
   </main>
 
   <!-- Card template -->
@@ -23,20 +66,20 @@
     <article class="card" tabindex="0">
       <div class="media">
         <div class="frame">
-          <img class="card-img" alt="" loading="lazy" />
+          <img class="card-img" src="" alt="" draggable="false" />
         </div>
       </div>
     </article>
   </template>
 
   <!-- Lightbox -->
-  <div id="lightbox" class="lightbox" role="dialog" aria-modal="true" aria-label="Image viewer" hidden>
-    <button class="close-btn" aria-label="Close viewer">&times;</button>
-    <button class="nav prev" aria-label="Previous image">&#10094;</button>
-    <img id="lightbox-img" alt="" />
-    <button class="nav next" aria-label="Next image">&#10095;</button>
+  <div id="lightbox" class="lightbox" hidden>
+    <button class="close-btn" aria-label="Close">&times;</button>
+    <button class="nav prev" aria-label="Previous">&#10094;</button>
+    <img id="lightbox-img" src="" alt="">
+    <button class="nav next" aria-label="Next">&#10095;</button>
   </div>
 
-  <script src="script.js" defer></script>
+  <script src="script.js"></script>
 </body>
 </html>
