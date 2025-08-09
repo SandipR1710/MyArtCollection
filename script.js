@@ -52,6 +52,82 @@ let currentIndex = 0;
 const audioRefs = new Set();
 let currentAudio = null; // ensure only one plays
 
+// ===== Web Audio visualizer (global) =====
+let audioCtx = null;
+const analyserByAudio = new WeakMap();
+let vizRAF = null;
+let vizTarget = null;
+
+function splitBands(total, bars){
+  const size = Math.floor(total / bars);
+  const res = [];
+  let s = 0;
+  for (let i = 0; i < bars; i++){
+    const e = (i === bars - 1) ? total : s + size;
+    res.push([s, e]);
+    s = e;
+  }
+  return res;
+}
+function stopVisualizer(){
+  if (vizRAF){ cancelAnimationFrame(vizRAF); vizRAF = null; }
+  if (vizTarget){
+    vizTarget.querySelectorAll('span').forEach(s => { s.style.height = '4px'; s.style.opacity = '.8'; });
+    vizTarget = null;
+  }
+}
+function useVisualizer(audio, vizEl, controls){
+  const Ctx = window.AudioContext || window.webkitAudioContext;
+  if (!Ctx){
+    vizEl.classList.add('fallback');
+    return;
+  }
+  vizEl.classList.remove('fallback');
+
+  if (!audioCtx) audioCtx = new Ctx();
+  if (audioCtx.state === 'suspended'){
+    audioCtx.resume().catch(()=>{});
+  }
+
+  if (!analyserByAudio.has(audio)){
+    try{
+      const src = audioCtx.createMediaElementSource(audio);
+      const analyser = audioCtx.createAnalyser();
+      analyser.fftSize = 64;
+      src.connect(analyser);
+      analyser.connect(audioCtx.destination);
+      analyserByAudio.set(audio, { src, analyser });
+    } catch {
+      vizEl.classList.add('fallback');
+      return;
+    }
+  }
+
+  const { analyser } = analyserByAudio.get(audio);
+  const bars = Array.from(vizEl.querySelectorAll('span'));
+  const data = new Uint8Array(analyser.frequencyBinCount);
+  const bands = splitBands(data.length, bars.length);
+
+  stopVisualizer();
+  vizTarget = vizEl;
+
+  (function tick(){
+    analyser.getByteFrequencyData(data);
+    for (let i = 0; i < bars.length; i++){
+      const [s, e] = bands[i];
+      let sum = 0, c = 0;
+      for (let j = s; j < e; j++){ sum += data[j]; c++; }
+      const avg = c ? sum / c : 0;
+      const h = 4 + (avg / 255) * 18;  // 4..22px
+      bars[i].style.height = `${h.toFixed(1)}px`;
+      bars[i].style.opacity = `${0.65 + (avg/255)*0.35}`;
+    }
+    vizRAF = requestAnimationFrame(tick);
+  })();
+
+  controls.classList.add('playing');
+}
+
 // ---------- RENDER ----------
 function renderFeatured(){
   const node = tpl.content.firstElementChild.cloneNode(true);
@@ -84,6 +160,7 @@ const fmt = (s) => {
   return `${m}:${r.toString().padStart(2,"0")}`;
 };
 function closeAllScrolls(except){
+  // kept for compatibility; no longer used to enforce single-open behavior
   document.querySelectorAll(".scroll-panel.open").forEach(p => {
     if (p !== except){
       p.classList.remove("open");
@@ -103,6 +180,7 @@ function setupCard(node, idx, side){
   const elaps = node.querySelector(".elapsed");
   const dur = node.querySelector(".duration");
   const media = node.querySelector(".media");
+  const viz = node.querySelector(".viz");
 
   const { src, alt } = allImages[idx];
   img.src = src;
@@ -135,9 +213,15 @@ function setupCard(node, idx, side){
   btn.addEventListener("click", () => {
     if (!audio.src) return;
     if (audio.paused) {
-      if (currentAudio && currentAudio !== audio) currentAudio.pause();
+      if (currentAudio && currentAudio !== audio){
+        currentAudio.pause(); // its pause handler will stop viz
+      }
       currentAudio = audio;
-      audio.play().then(() => setUI(true)).catch(()=>{});
+
+      audio.play().then(() => {
+        setUI(true);
+        useVisualizer(audio, viz, controls);
+      }).catch(()=>{});
     } else {
       audio.pause();
       setUI(false);
@@ -170,8 +254,14 @@ function setupCard(node, idx, side){
       }
     } catch {}
   });
-  audio.addEventListener("play", () => { currentAudio = audio; setUI(true); });
-  audio.addEventListener("pause", () => { setUI(false); if (currentAudio === audio) currentAudio = null; });
+  audio.addEventListener("play", () => {
+    setUI(true);
+  });
+  audio.addEventListener("pause", () => {
+    setUI(false);
+    if (currentAudio === audio) currentAudio = null;
+    stopVisualizer();
+  });
 
   // Seeking
   const updateSeekFill = () => {
@@ -204,13 +294,16 @@ function setupCard(node, idx, side){
     `;
     media.appendChild(panel);
 
+    // ✅ Keep panels open on page load (animate in)
+    requestAnimationFrame(() => panel.classList.add("open"));
+
+    // ✅ Allow MULTIPLE panels open at once
     const togglePanel = () => {
       if (panel.classList.contains("open")){
         panel.classList.remove("open");
         panel.classList.add("closing");
         setTimeout(() => panel.classList.remove("closing"), 420);
       } else {
-        closeAllScrolls(panel);
         panel.classList.remove("closing");
         panel.classList.add("open");
       }
