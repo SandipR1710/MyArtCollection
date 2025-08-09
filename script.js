@@ -1,22 +1,19 @@
 // ---------- DATA ----------
-// Set your favorite drawing here:
 const favorite = {
-    src: "img7.jpeg",      // <-- change to your favorite drawing path
+    src: "img7.jpeg",
     alt: "Favorite portrait"
   };
   
-  // Other drawings (7 left)
   const images = [
     { src: "img1.jpeg", alt: "Portrait 1" },
-    { src: "img2.jpeg", alt: "Portrait 1" },
-    { src: "img3.jpeg", alt: "Portrait 1" },
-    { src: "img4.jpeg", alt: "Portrait 1" },
-    { src: "img5.jpeg", alt: "Portrait 1" },
-    { src: "img6.jpeg", alt: "Portrait 1" },
-    { src: "img8.jpeg", alt: "Portrait 1" },
+    { src: "img2.jpeg", alt: "Portrait 2" },
+    { src: "img3.jpeg", alt: "Portrait 3" },
+    { src: "img4.jpeg", alt: "Portrait 4" },
+    { src: "img5.jpeg", alt: "Portrait 5" },
+    { src: "img6.jpeg", alt: "Portrait 6" },
+    { src: "img8.jpeg", alt: "Portrait 7" },
   ];
   
-  // For the lightbox (favorite first)
   const allImages = [favorite, ...images];
   
   // ---------- ELEMENTS ----------
@@ -26,7 +23,6 @@ const favorite = {
   const g3 = document.getElementById("gallery-3");
   const tpl = document.getElementById("card-template");
   
-  // Feature flags
   const supportsHover = matchMedia("(hover: hover)").matches && matchMedia("(pointer: fine)").matches;
   const prefersReduced = matchMedia("(prefers-reduced-motion: reduce)").matches;
   
@@ -50,20 +46,15 @@ const favorite = {
   
     if (supportsHover && !prefersReduced) addTilt(frame);
   
-    // Open lightbox at index 0
     node.addEventListener("click", () => openLightbox(0));
     node.addEventListener("keydown", (e) => {
-      if (e.key === "Enter" || e.key === " ") {
-        e.preventDefault();
-        openLightbox(0);
-      }
+      if (e.key === "Enter" || e.key === " ") { e.preventDefault(); openLightbox(0); }
     });
   
     featuredWrap.appendChild(node);
   }
   
   function renderGalleries(){
-    // Split into 3 groups: 3, 2, 2
     const groups = [
       { el: g1, items: images.slice(0, 3), offset: 1 },
       { el: g2, items: images.slice(3, 5), offset: 1 + 3 },
@@ -81,14 +72,10 @@ const favorite = {
   
         if (supportsHover && !prefersReduced) addTilt(frame);
   
-        // Lightbox index in the combined array (favorite at 0)
         const idx = group.offset + j;
         node.addEventListener("click", () => openLightbox(idx));
         node.addEventListener("keydown", (e) => {
-          if (e.key === "Enter" || e.key === " ") {
-            e.preventDefault();
-            openLightbox(idx);
-          }
+          if (e.key === "Enter" || e.key === " ") { e.preventDefault(); openLightbox(idx); }
         });
   
         group.el.appendChild(node);
@@ -98,34 +85,26 @@ const favorite = {
   
   // ---------- INTERACTION ----------
   function addTilt(el){
-    const maxTilt = 6; // degrees
+    const maxTilt = 6;
     const reset = () => {
       el.classList.remove("hovering");
       el.style.transform = "perspective(900px) rotateX(0deg) rotateY(0deg)";
     };
-  
-    el.addEventListener("pointerenter", () => {
-      el.classList.add("hovering");
-    });
-  
+    el.addEventListener("pointerenter", () => { el.classList.add("hovering"); });
     el.addEventListener("pointermove", (e) => {
       const rect = el.getBoundingClientRect();
       const x = e.clientX - rect.left;
       const y = e.clientY - rect.top;
       const px = (x / rect.width) - 0.5;
       const py = (y / rect.height) - 0.5;
-  
       const rx = (-py * maxTilt).toFixed(2);
       const ry = ( px * maxTilt).toFixed(2);
-  
       el.style.setProperty("--mx", `${x}px`);
       el.style.setProperty("--my", `${y}px`);
       el.style.transform = `perspective(900px) rotateX(${rx}deg) rotateY(${ry}deg)`;
-  
       const shineStrength = Math.min(1, Math.hypot(px, py) * 3);
       el.style.setProperty("--shine", shineStrength.toFixed(2));
     });
-  
     el.addEventListener("pointerleave", reset);
     el.addEventListener("pointercancel", reset);
   }
@@ -153,21 +132,13 @@ const favorite = {
     lightboxImg.src = src;
     lightboxImg.alt = alt || `Artwork ${currentIndex+1}`;
   }
-  function next(){
-    currentIndex = (currentIndex + 1) % allImages.length;
-    updateLightbox();
-  }
-  function prev(){
-    currentIndex = (currentIndex - 1 + allImages.length) % allImages.length;
-    updateLightbox();
-  }
+  function next(){ currentIndex = (currentIndex + 1) % allImages.length; updateLightbox(); }
+  function prev(){ currentIndex = (currentIndex - 1 + allImages.length) % allImages.length; updateLightbox(); }
   
   closeBtn.addEventListener("click", closeLightbox);
   nextBtn.addEventListener("click", next);
   prevBtn.addEventListener("click", prev);
-  lightbox.addEventListener("click", (e) => {
-    if (e.target === lightbox) closeLightbox();
-  });
+  lightbox.addEventListener("click", (e) => { if (e.target === lightbox) closeLightbox(); });
   
   // Init
   renderFeatured();

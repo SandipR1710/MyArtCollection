@@ -14,12 +14,17 @@
 
   /* Surfaces & shines */
   --frame-bg: #0e151f;
-  --frame-shine-rgb: 125, 211, 252;  /* cyan for galleries */
+  --frame-shine-rgb: 125, 211, 252;   /* cyan for galleries */
   --frame-shine-alpha: 0.22;
 
   /* Gallery ring colors (blue → green) */
   --gallery-ring-1: rgba(56,189,248,.95);
   --gallery-ring-2: rgba(16,185,129,.95);
+
+  /* Floral dusk accents (very subtle) */
+  --floral-rose: 255, 163, 214;  /* soft rose */
+  --floral-lav: 196, 132, 252;   /* lavender */
+  --floral-mint: 153, 246, 228;  /* mint */
 }
 
 * { box-sizing: border-box; }
@@ -29,6 +34,7 @@ body{
   margin: 0;
   font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
   color: var(--text);
+  /* Keep your original aurora base */
   background:
     radial-gradient(1200px 800px at 8% -10%, #0e141c 0%, transparent 60%),
     radial-gradient(1000px 700px at 110% 120%, #0a1220 0%, transparent 62%),
@@ -36,31 +42,37 @@ body{
   background-attachment: fixed;
 }
 
-/* AURORA BACKGROUND LAYERS */
+/* AURORA + FLORAL OVERLAYS */
 body::before{
+  /* aurora with a floral tint */
   content:"";
   position: fixed; inset: 0;
   pointer-events: none;
   z-index: 0;
   background:
-    radial-gradient(700px 420px at 18% 12%, rgba(64,200,255,.16) 0%, rgba(64,200,255,0) 62%),
-    radial-gradient(820px 480px at 82% 20%, rgba(168,85,247,.12) 0%, rgba(168,85,247,0) 64%),
-    radial-gradient(760px 460px at 30% 88%, rgba(34,197,94,.12) 0%, rgba(34,197,94,0) 60%);
+    /* soft floral glows */
+    radial-gradient(900px 520px at 20% 8%, rgba(var(--floral-rose), .12) 0%, rgba(var(--floral-rose), 0) 60%),
+    radial-gradient(780px 460px at 82% 16%, rgba(var(--floral-lav), .10) 0%, rgba(var(--floral-lav), 0) 60%),
+    radial-gradient(760px 520px at 30% 88%, rgba(var(--floral-mint), .08) 0%, rgba(var(--floral-mint), 0) 60%);
   mix-blend-mode: screen;
   opacity: .9;
 }
 body::after{
+  /* delicate floral pattern + faint grid texture */
   content:"";
   position: fixed; inset: 0;
   pointer-events: none;
   z-index: 0;
-  opacity: .12;
+  opacity: .18;
   background:
-    repeating-linear-gradient(0deg, rgba(255,255,255,.015) 0 1px, transparent 1px 2px),
-    repeating-linear-gradient(90deg, rgba(255,255,255,.015) 0 1px, transparent 1px 2px);
+    /* 1) subtle line-art flower tile (data-URI SVG), very faint */
+    url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='160' height='160' viewBox='0 0 160 160'><g fill='none' stroke='%23ffffff' stroke-opacity='.045' stroke-width='1'><ellipse cx='80' cy='28' rx='10' ry='22'/><ellipse cx='80' cy='132' rx='10' ry='22'/><ellipse cx='28' cy='80' rx='22' ry='10'/><ellipse cx='132' cy='80' rx='22' ry='10'/><ellipse cx='46' cy='46' rx='12' ry='6' transform='rotate(-45 46 46)'/><ellipse cx='114' cy='114' rx='12' ry='6' transform='rotate(-45 114 114)'/></g></svg>") center / 180px 180px repeat,
+    /* 2) soft crosshair texture to add depth */
+    repeating-linear-gradient(0deg, rgba(255,255,255,.02) 0 1px, transparent 1px 2px),
+    repeating-linear-gradient(90deg, rgba(255,255,255,.02) 0 1px, transparent 1px 2px);
 }
 
-/* Keep content above the background layers */
+/* Keep content above overlays */
 main, header, .gallery, .card, .lightbox, .featured{ position: relative; z-index: 1; }
 
 /* Header */
@@ -81,6 +93,7 @@ main, header, .gallery, .card, .lightbox, .featured{ position: relative; z-index
   --featured-glow-rgb: 168, 85, 247;
   --featured-ring-1: rgba(168,85,247,.9);
   --featured-ring-2: rgba(99,102,241,.9);
+  --featured-glow-alpha: 0.26;
 
   padding: clamp(8px,2vw,16px) 0 clamp(6px,2.5vw,18px);
 }
@@ -97,10 +110,30 @@ main, header, .gallery, .card, .lightbox, .featured{ position: relative; z-index
   margin-inline: auto;
 }
 
-/* Section spacing for titles */
-.section{ padding-block: clamp(14px, 2.6vw, 28px); }
+/* 6 white lines (3 each side) – unchanged */
+.side-lines{
+  display: flex;
+  flex-direction: column;
+  gap: clamp(8px, 1.2vw, 14px);
+  justify-content: center;
+  opacity: .9;
+}
+.side-lines .line{
+  position: relative;
+  display: block;
+  height: 1px;
+  background: linear-gradient(90deg, rgba(255,255,255,.85), rgba(255,255,255,.25));
+  border-radius: 1px;
+  box-shadow: 0 0 18px rgba(255,255,255,.06);
+}
+.side-lines .l1{ width: clamp(120px, 14vw, 200px); }
+.side-lines .l2{ width: clamp(90px, 12vw, 160px); }
+.side-lines .l3{ width: clamp(70px, 10vw, 120px); }
+.side-lines.left .line{ margin-left: auto; }
+.side-lines.right .line{ margin-right: auto; }
 
-/* CENTERED TITLES WITH LINES */
+/* Section titles with floral-tinted lines */
+.section{ padding-block: clamp(14px, 2.6vw, 28px); }
 .section-title{
   display: flex; align-items: center; justify-content: center;
   gap: 12px;
@@ -113,50 +146,23 @@ main, header, .gallery, .card, .lightbox, .featured{ position: relative; z-index
   content: ""; height: 1px; flex: 1 1 0;
 }
 .section-title::before{
-  background: linear-gradient(90deg, rgba(125,211,252,.45), rgba(125,211,252,0));
+  background: linear-gradient(90deg,
+    rgba(var(--floral-rose), .35),
+    rgba(var(--floral-rose), 0));
 }
 .section-title::after{
-  background: linear-gradient(90deg, rgba(125,211,252,0), rgba(125,211,252,.45));
+  background: linear-gradient(90deg,
+    rgba(var(--floral-rose), 0),
+    rgba(var(--floral-rose), .35));
 }
 
-/* ---------- THEMED SECTION WRAPPERS (A / B / C) ---------- */
+/* ===== Themed wrappers (keep same background for all) ===== */
+.themed{ padding: clamp(28px, 6vw, 72px) 0; }
+.themed-inner{ max-width: 1200px; margin: 0 auto; padding-inline: clamp(8px, 2vw, 16px); }
 
-.themed{
-  position: relative;
-  padding: clamp(28px, 6vw, 72px) 0;
-  overflow: clip; /* keep glow contained nicely */
-}
-.themed-inner{
-  max-width: 1200px;
-  margin: 0 auto;
-  padding-inline: clamp(8px, 2vw, 16px); /* keeps visual edges even */
-}
-
-/* Each theme adds a soft background that matches the global vibe */
-.themed::before{
-  content:"";
-  position: absolute; inset: 0;
-  pointer-events: none;
-  opacity: .65;
-  mix-blend-mode: screen;
-  background:
-    radial-gradient(800px 420px at 50% 0%, var(--t1, rgba(125,211,252,.14)) 0%, transparent 70%),
-    radial-gradient(700px 420px at 30% 90%, var(--t2, rgba(34,197,94,.12)) 0%, transparent 70%);
-  filter: saturate(1.1);
-}
-
-/* A: cyan + soft teal */
-.themed--a{ --t1: rgba(56,189,248,.18); --t2: rgba(34,197,94,.12); }
-/* B: indigo + violet */
-.themed--b{ --t1: rgba(99,102,241,.16); --t2: rgba(168,85,247,.14); }
-/* C: emerald + aqua */
-.themed--c{ --t1: rgba(16,185,129,.18); --t2: rgba(56,189,248,.12); }
-
-/* ===== GALLERY GRIDS (CENTERED) ===== */
-
+/* ===== CENTERED GALLERY GRIDS (unchanged layout) ===== */
 .gallery{
-  /* per-section variables override below */
-  --cols: 3;
+  --cols: 3;                          /* overridden per section below */
   --cw: 300px;
   --cg: clamp(40px, 6vw, 96px);
 
@@ -165,26 +171,17 @@ main, header, .gallery, .card, .lightbox, .featured{ position: relative; z-index
   column-gap: var(--cg);
   row-gap: clamp(20px, 4.5vw, 40px);
 
-  width: max-content;          /* shrink to content width */
-  margin-inline: auto;         /* perfect horizontal centering */
-  justify-items: center;       /* center each card in its track */
+  width: max-content;                 /* shrink to content width */
+  margin-inline: auto;                /* perfectly centered */
+  justify-items: center;
 }
 
 /* A: 3 drawings */
-#gallery-1{
-  --cols: 3;
-  --cw: clamp(260px, 27vw, 340px);
-}
+#gallery-1{ --cols: 3; --cw: clamp(260px, 27vw, 340px); }
 /* B: 2 drawings */
-#gallery-2{
-  --cols: 2;
-  --cw: clamp(280px, 28.5vw, 360px);
-}
+#gallery-2{ --cols: 2; --cw: clamp(280px, 28.5vw, 360px); }
 /* C: 2 drawings */
-#gallery-3{
-  --cols: 2;
-  --cw: clamp(290px, 29vw, 370px);
-}
+#gallery-3{ --cols: 2; --cw: clamp(290px, 29vw, 370px); }
 
 /* Card wrapper + plate */
 .card{
@@ -200,13 +197,15 @@ main, header, .gallery, .card, .lightbox, .featured{ position: relative; z-index
   inset: -10px;
   border-radius: calc(var(--frame-radius) + 22px);
   background: #0f141b;
+  /* tiny floral glow accent mixed into the plate */
   box-shadow:
     0 18px 42px rgba(0,0,0,0.45),
+    0 0 34px rgba(var(--floral-lav), .06),
     0 0 40px rgba(125,211,252, 0.07);
   z-index: 0;
 }
 
-/* Visible frame (gradient ring + no shine on image) */
+/* Visible frame */
 .media{ position: relative; }
 .frame{
   position: relative;
@@ -225,7 +224,7 @@ main, header, .gallery, .card, .lightbox, .featured{ position: relative; z-index
   transform: perspective(900px) rotateX(0deg) rotateY(0deg);
 }
 
-/* Frame-only shine */
+/* Frame-only shine (kept cyan) */
 .frame::after{
   content: "";
   position: absolute; inset: 0;
@@ -259,6 +258,7 @@ main, header, .gallery, .card, .lightbox, .featured{ position: relative; z-index
   .frame:hover{
     box-shadow:
       0 14px 30px rgba(0,0,0,.50),
+      0 0 40px rgba(var(--floral-lav), .12),
       0 0 34px rgba(125,211,252, var(--glow-alpha));
     outline: 0;
   }
@@ -310,15 +310,13 @@ main, header, .gallery, .card, .lightbox, .featured{ position: relative; z-index
   #gallery-2{ --cols: 2; --cw: clamp(260px, 38vw, 340px); }
   #gallery-3{ --cols: 2; --cw: clamp(270px, 40vw, 350px); }
 }
-
 @media (max-width: 640px){
   .featured-row{ grid-template-columns: 1fr; }
-  .side-lines{ display: none; }
+  .side-lines{ display: none; } /* remove this line if you want the 6 lines on phones too */
 
   .gallery{
     width: 100%;
     grid-template-columns: 1fr; /* one per row */
-    justify-items: center;
     column-gap: 0;
     row-gap: clamp(20px, 7vw, 36px);
   }
