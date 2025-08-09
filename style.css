@@ -1,0 +1,115 @@
+/* Background */
+body {
+    background: linear-gradient(135deg, #0d1117, #161b22);
+    font-family: 'Segoe UI', sans-serif;
+    color: #fff;
+    text-align: center;
+    margin: 0;
+    padding: 20px;
+}
+
+/* Heading */
+h1 {
+    font-size: 2.2rem;
+    color: #9ae6b4; /* soft green */
+    margin-bottom: 40px;
+    text-shadow: 0 0 8px rgba(154, 230, 180, 0.4);
+}
+
+/* Gallery layout */
+.gallery {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 25px;
+}
+
+/* Polaroid card */
+.polaroid {
+    background: #1c2128;
+    border: 1px solid rgba(154, 230, 180, 0.4);
+    padding: 12px;
+    border-radius: 12px;
+    box-shadow: 0 0 12px rgba(154, 230, 180, 0.15);
+    width: min(320px, 90%);
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+    cursor: pointer;
+}
+
+/* Image */
+.polaroid img {
+    width: 100%;
+    height: auto;
+    display: block;
+    border-radius: 8px;
+}
+
+/* Caption */
+.caption {
+    font-family: 'Great Vibes', cursive; /* Elegant handwritten font */
+    font-size: 1.5rem;
+    color: #e6d5f7; /* soft lavender */
+    margin-top: 10px;
+    text-shadow: 0 0 6px rgba(230, 213, 247, 0.4);
+    letter-spacing: 0.5px;
+}
+/* Hover effect */
+.polaroid:hover {
+    transform: scale(1.03);
+    box-shadow: 0 0 18px rgba(154, 230, 180, 0.25);
+}
+
+/* Lightbox */
+#lightbox {
+    display: none;
+    position: fixed;
+    z-index: 100;
+    padding-top: 50px;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0,0,0,0.92);
+}
+
+#lightbox img {
+    margin: auto;
+    display: block;
+    max-width: 90%;
+    max-height: 80%;
+    box-shadow: 0 0 15px rgba(154, 230, 180, 0.3);
+    border-radius: 10px;
+}
+
+.close {
+    position: absolute;
+    top: 20px;
+    right: 35px;
+    color: #fff;
+    font-size: 40px;
+    font-weight: bold;
+    cursor: pointer;
+    text-shadow: 0 0 12px rgba(251, 182, 206, 0.5);
+}
+
+/* Responsive */
+/* @media (max-width: 768px) {
+    h1 { font-size: 1.8rem; }
+    .gallery { gap: 15px; }
+} */
+
+/* Responsive Card Sizes */
+@media (max-width: 768px) {
+    .polaroid {
+      width: 80%;  /* Smaller for tablets */
+      max-width: 300px;
+    }
+  }
+  
+  @media (max-width: 480px) {
+    .polaroid {
+      width: 90%;  /* Almost full width for mobile */
+      max-width: 260px;
+    }
+  }
+  
