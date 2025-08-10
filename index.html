@@ -9,7 +9,7 @@
 <body>
   <header class="site-header">
     <h1>Her Portraits</h1>
-    <p class="subtitle">A little surprise for my Blueberry💖</p>
+    <p class="subtitle">Dark, calm gallery with a framed glow ✨</p>
   </header>
 
   <!-- ===== Featured (purple glow) ===== -->
@@ -62,10 +62,23 @@
 
   <!-- Card template -->
   <template id="card-template">
-    <article class="card" tabindex="0">
+    <article class="card reveal" tabindex="0">
       <div class="media">
         <div class="frame">
-          <img class="card-img" src="" alt="" draggable="false" />
+          <!-- Flip surface (front = image, back = note). Controls stay outside so they never flip -->
+          <div class="flip">
+            <div class="flip-inner">
+              <div class="flip-front">
+                <img class="card-img" src="" alt="" draggable="false" loading="lazy" />
+              </div>
+              <div class="flip-back">
+                <div class="note">
+                  <h3>From the Artist</h3>
+                  <p class="note-text"></p>
+                </div>
+              </div>
+            </div>
+          </div>
 
           <!-- Controls in the frame’s bottom padding -->
           <div class="controls" role="group" aria-label="Audio controls">
@@ -81,6 +94,11 @@
                 <span class="scroll-ico" aria-hidden="true"></span>
               </button>
 
+              <!-- Flip trigger (only visible on FAVORITE) -->
+              <button class="flip-btn" type="button" aria-label="Flip card">
+                <span class="flip-ico" aria-hidden="true"></span>
+              </button>
+
               <div class="viz" aria-hidden="true">
                 <span></span><span></span><span></span><span></span><span></span>
               </div>
@@ -94,7 +112,7 @@
           </div>
         </div>
 
-        <!-- Scroll panels will be injected here for last 4 cards -->
+        <!-- Scroll panels (for last 4 cards) will be injected here -->
       </div>
     </article>
   </template>
@@ -113,7 +131,7 @@
 
     <div class="footer-inner">
       <!-- Small artist card (no controls/lightbox) -->
-      <article class="card artist-card">
+      <article class="card artist-card reveal">
         <div class="media">
           <div class="frame">
             <img class="card-img" src="Artist.JPG" alt="Artist portrait" draggable="false" />
@@ -123,7 +141,7 @@
 
       <!-- Animated text -->
       <div class="artist-words">
-        <p id="artist-typed" class="typed" aria-live="polite"></p>
+        <p id="artist-typed" class="typed gradient-text" aria-live="polite"></p>
         <!-- caret intentionally removed -->
       </div>
     </div>
