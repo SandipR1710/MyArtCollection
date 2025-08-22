@@ -1,4 +1,4 @@
-// ---------- DATA ----------
+// ---------- DATA (base gallery) ----------
 const favorite = { src: "img7.jpeg", alt: "Favorite portrait" };
 const images = [
   { src: "img1.jpeg", alt: "Portrait 1" },
@@ -17,14 +17,68 @@ const songs = [
   "Enna_Sona.mp3",
   "Kaun_Tujhe.mp3",
   "Humnava.mp3",
-  "O_Radhe_Radhe.mp3",
+  "Maand.mp3",
   "Nazar_Na.mp3",
   "Tum_Hi_Ho.mp3",
 ];
 
+// This holds every image used in lightbox (base + duets). Keep base first (indexes 0..7).
 const allImages = [favorite, ...images];
 
-// Unique quotes per last 4 cards
+// ---------- DUETS DATA (flowers × portraits) ----------
+// Put your real file names/paths here:
+const duetsData = [
+  {
+    flowerName: "Wild Rose",
+    flowerSrc: "Wild_Rose.jpg",
+    portraitSrc: "img.jpeg",
+    song: "Tum_Ho_Toh.mp3",
+    altFlower: "Close-up of a wild rose bloom",
+    altPortrait: "Portrait inspired by a wild rose"
+  },
+  {
+    flowerName: "Pink Rose",
+    flowerSrc: "Pink_Rose.jpg",
+    portraitSrc: "img12.jpeg",
+    song: "Raat_Akeli_Thi.mp3",
+    altFlower: "Pink rose petals",
+    altPortrait: "Portrait inspired by a pink rose"
+  },
+  {
+    flowerName: "Monkey Flower",
+    flowerSrc: "Monkey_Flower.jpeg",
+    portraitSrc: "img13.jpeg",
+    song: "Dhun.mp3",
+    altFlower: "Monkey flower with speckled petals",
+    altPortrait: "Portrait inspired by the monkey flower"
+  },
+  {
+    flowerName: "Jasmine",
+    flowerSrc: "Jasmine.jpg",
+    portraitSrc: "img9.jpeg",
+    song: "Samjhawan.mp3",
+    altFlower: "White jasmine blossoms",
+    altPortrait: "Portrait inspired by jasmine"
+  },
+  {
+    flowerName: "Lavender",
+    flowerSrc: "Lavender.jpg",
+    portraitSrc: "img10.jpeg",
+    song: "Jab_Tak.mp3",
+    altFlower: "Lavender spikes in bloom",
+    altPortrait: "Portrait inspired by lavender"
+  },
+  {
+    flowerName: "Sunflower",
+    flowerSrc: "Sunflower.jpg",
+    portraitSrc: "img11.jpeg",
+    song: "Pehli_Nazar_Mein_Race.mp3",
+    altFlower: "Sunflower facing the light",
+    altPortrait: "Portrait inspired by a sunflower"
+  }
+];
+
+// Unique quotes per last 4 base cards
 const scrollQuotesByIndex = {
   4: ["You arrived like quiet rain.", "My storms learned to rest."],
   5: ["Moonlight learns your name.", "Softly, the night agrees."],
@@ -50,6 +104,7 @@ const featuredWrap = document.getElementById("featured");
 const g1 = document.getElementById("gallery-1");
 const g2 = document.getElementById("gallery-2");
 const g3 = document.getElementById("gallery-3");
+const duetsGrid = document.getElementById("duets-grid");
 const tpl = document.getElementById("card-template");
 
 const supportsHover = matchMedia("(hover: hover)").matches && matchMedia("(pointer: fine)").matches;
@@ -133,7 +188,7 @@ function useVisualizer(audio, vizEl, controls){
   controls.classList.add('playing');
 }
 
-// ---------- RENDER ----------
+// ---------- RENDER: Base ----------
 function renderFeatured(){
   const node = tpl.content.firstElementChild.cloneNode(true);
   setupCard(node, 0, null);
@@ -166,7 +221,7 @@ const fmt = (s) => {
   return `${m}:${r.toString().padStart(2,"0")}`;
 };
 
-// ---------- CARD SETUP ----------
+// ---------- CARD SETUP (Base gallery cards) ----------
 function setupCard(node, idx, side){
   const frame = node.querySelector(".frame");
   const controls = node.querySelector(".controls");
@@ -176,8 +231,6 @@ function setupCard(node, idx, side){
   const dur = node.querySelector(".duration");
   const media = node.querySelector(".media");
   const viz = node.querySelector(".viz");
-
-  // Flip parts
   const flipInner = node.querySelector(".flip-inner");
   const noteText = node.querySelector(".note-text");
   const flipBtn = node.querySelector(".flip-btn");
@@ -296,23 +349,31 @@ function setupCard(node, idx, side){
   // ---- FLIP (favorite only) ----
   if (idx === 0){
     // turn the note into multi-line poem with smooth animation
+    const noteBox = node.querySelector('.note');
     noteBox.classList.add('note-poem');
-    // remove any scrollbars in the favorite note
     noteBox.style.overflow = 'visible';
     noteBox.style.maxHeight = 'none';
 
+    const noteText = node.querySelector(".note-text");
     noteText.innerHTML = favoriteNoteLines
       .map(l => `<span class="poem-line">${l}</span>`)
       .join("");
 
-    const onFlip = (e) => { e.stopPropagation(); flipInner.classList.toggle('flipped'); };
+    const onFlip = (e) => {
+      e.stopPropagation();
+      flipInner.classList.toggle('flipped');
+      const flipBtn = node.querySelector('.flip-btn');
+      flipBtn.setAttribute('aria-pressed', flipInner.classList.contains('flipped') ? 'true' : 'false');
+    };
+    const flipBtn = node.querySelector(".flip-btn");
     flipBtn.addEventListener('click', onFlip);
     flipBtn.addEventListener('pointerdown', (e) => e.stopPropagation());
     flipBtn.addEventListener('keydown', (e) => {
       if (e.key === "Enter" || e.key === " "){ e.preventDefault(); e.stopPropagation(); onFlip(e); }
     });
   } else {
-    flipBtn.style.display = "none";
+    const fb = node.querySelector(".flip-btn");
+    if (fb) fb.style.display = "none";
   }
 
   // Lightbox (ignore clicks on controls/scroll/flip)
@@ -324,6 +385,8 @@ function setupCard(node, idx, side){
     if (e.target.closest(".controls") || e.target.closest(".scroll-panel") || e.target.closest(".flip-btn")) return;
     if (e.key === "Enter" || e.key === " ") { e.preventDefault(); openLightbox(idx); }
   });
+
+  if (supportsHover && !prefersReduced) addTilt(frame);
 }
 
 // ---------- INTERACTION ----------
@@ -379,10 +442,6 @@ nextBtn.addEventListener("click", next);
 prevBtn.addEventListener("click", prev);
 lightbox.addEventListener("click", (e) => { if (e.target === lightbox) closeLightbox(); });
 
-// ---------- INIT ----------
-renderFeatured();
-renderGalleries();
-
 /* ===== Footer looped typewriter ===== */
 (function runTypewriterLoop(){
   const el = document.getElementById('artist-typed');
@@ -418,14 +477,14 @@ renderGalleries();
 })();
 
 /* ===== Scroll-reveal ===== */
-(function revealOnScroll(){
+function revealOnScroll(){
   const items = document.querySelectorAll('.reveal');
   if (!items.length) return;
   const io = new IntersectionObserver((entries) => {
     entries.forEach(e => { if (e.isIntersecting){ e.target.classList.add('in'); io.unobserve(e.target); } });
   }, {rootMargin: "0px 0px -10% 0px", threshold: 0.15});
   items.forEach(el => io.observe(el));
-})();
+}
 
 /* ===== Footer artist card alignment (JS-only precise corner match) ===== */
 (function fixFooterArtistCard(){
@@ -453,66 +512,267 @@ renderGalleries();
   document.head.appendChild(tag);
 })();
 
-/* ===== Favorite poem styles (injected, no scrollbars, visible animation) ===== */
+/* ===== Favorite poem styles (visual polish) ===== */
 (function injectPoemStyles(){
   const css = `
-    /* remove any scrollbar from favorite note */
-    .note-poem{ overflow: hidden !important; }
-    .note-poem::-webkit-scrollbar{ width:0; height:0; }
-
-    .note-poem { text-align:center; }
-    .note-poem .note-text{
-      display:flex; flex-direction:column; align-items:center; gap:10px;
+    .is-favorite .flip-back{
+      background:
+        radial-gradient(120% 120% at 15% 5%, rgba(124,58,237,.18), transparent 58%),
+        radial-gradient(110% 110% at 85% 95%, rgba(34,211,238,.14), transparent 60%),
+        linear-gradient(180deg, rgba(14,20,31,.92), rgba(8,12,20,.94));
+      border: 1px solid rgba(255,255,255,.06);
+      box-shadow:
+        inset 0 0 0 1px rgba(255,255,255,.03),
+        0 18px 50px rgba(0,0,0,.45);
+      backdrop-filter: blur(6px);
     }
-
-    /* soothing serif + gradient flow */
+    .note-poem{ overflow: hidden !important; text-align: center; padding: 8px 6px; }
+    .note-poem::-webkit-scrollbar{ width:0; height:0; }
+    .note-poem h3{
+      margin: 2px 0 8px 0;
+      font-family: ui-serif, Georgia, Cambria, "Times New Roman", serif;
+      font-weight: 800;
+      font-style: italic;
+      font-size: clamp(14px, 1.3vw, 18px);
+      letter-spacing: .3px;
+      color: #eaf2ff;
+      opacity: .9;
+      text-shadow: 0 1px 0 rgba(0,0,0,.28);
+    }
+    .note-poem .note-text{
+      display:flex; flex-direction:column; align-items:center; gap:12px;
+    }
     .note-poem .poem-line{
       font-family: ui-serif, Georgia, Cambria, "Times New Roman", serif;
       font-style: italic;
       font-weight: 700;
-      font-size: clamp(20px, 2.6vw, 30px);
+      font-size: clamp(22px, 2.8vw, 34px);
       line-height: 1.35;
-      letter-spacing: .2px;
-      background: linear-gradient(90deg, #e8f0ff, #d7c8ff, #bfefff, #e8f0ff);
-      background-size: 200% 100%;
+      letter-spacing: .25px;
+      background: linear-gradient(90deg, #eaf2ff, #d7c8ff, #bfefff, #eaf2ff);
+      background-size: 220% 100%;
       -webkit-background-clip: text; background-clip: text; color: transparent;
-      text-shadow: 0 1px 0 rgba(0,0,0,.25);
+      text-shadow: 0 0 12px rgba(124,58,237,.18), 0 1px 0 rgba(0,0,0,.25);
       opacity: 0;
-      transform: translateY(10px) scale(.98);
-      filter: blur(4px);
+      transform: translateY(16px) scale(.965);
+      filter: blur(6px);
     }
-
-    /* appear + gentle shimmer */
     .flip-inner.flipped .note-poem .poem-line{
       animation:
-        poemLineIn .7s cubic-bezier(.2,.7,.2,1) forwards,
-        gradientShift 16s linear infinite 1s;
+        poemLineIn .9s cubic-bezier(.2,.7,.2,1) forwards,
+        gradientShift 14s linear infinite 1.2s;
     }
-    .flip-inner.flipped .note-poem .poem-line:nth-child(1){ animation-delay: .05s, 1s; }
-    .flip-inner.flipped .note-poem .poem-line:nth-child(2){ animation-delay: .18s, 1s; }
-    .flip-inner.flipped .note-poem .poem-line:nth-child(3){ animation-delay: .32s, 1s; }
-    .flip-inner.flipped .note-poem .poem-line:nth-child(4){ animation-delay: .50s, 1s; }
-
-    /* decorative quotes */
-    .note-poem::before, .note-poem::after{
-      content: "“";
-      position: absolute;
-      color: rgba(255,255,255,.12);
-      font-size: clamp(48px, 6vw, 72px);
-      line-height: 1;
-      pointer-events: none;
-      filter: drop-shadow(0 2px 0 rgba(0,0,0,.25));
-    }
-    .note-poem::before{ left: 6px; top: 2px; }
-    .note-poem::after{ content:"”"; right: 6px; bottom: 2px; }
+    .flip-inner.flipped .note-poem .poem-line:nth-child(1){ animation-delay: .06s, 1.2s; }
+    .flip-inner.flipped .note-poem .poem-line:nth-child(2){ animation-delay: .22s, 1.2s; }
+    .flip-inner.flipped .note-poem .poem-line:nth-child(3){ animation-delay: .40s, 1.2s; }
+    .flip-inner.flipped .note-poem .poem-line:nth-child(4){ animation-delay: .62s, 1.2s; }
 
     @keyframes poemLineIn{
-      from{ opacity:0; transform: translateY(10px) scale(.98); filter: blur(4px); }
-      to  { opacity:1; transform: translateY(0)    scale(1);   filter: blur(0);  }
+      0%   { opacity:0; transform: translateY(16px) scale(.965); filter: blur(6px); letter-spacing:.6px; }
+      60%  { opacity:1; transform: translateY(0)    scale(1);     filter: blur(0);   letter-spacing:.2px; }
+      100% { opacity:1; transform: translateY(0)    scale(1);     filter: blur(0);   letter-spacing:.2px; }
     }
-    @keyframes gradientShift{ 0%{ background-position: 0% 0 } 100%{ background-position: 200% 0 } }
+    @keyframes gradientShift{ 0%{ background-position: 0% 0 } 100%{ background-position: 220% 0 } }
   `;
   const tag = document.createElement('style');
   tag.appendChild(document.createTextNode(css));
   document.head.appendChild(tag);
 })();
+
+// ---------- DUETS: helpers ----------
+function makeArrowSVG(reverse=false){
+  const svg = document.createElementNS("http://www.w3.org/2000/svg","svg");
+  svg.setAttribute("viewBox","0 0 100 100");
+  svg.classList.add("arrow-svg");
+  const defs = document.createElementNS(svg.namespaceURI, "defs");
+  const grad = document.createElementNS(svg.namespaceURI, "linearGradient");
+  grad.setAttribute("id","duetGrad"+Math.random().toString(36).slice(2));
+  grad.setAttribute("x1","0%"); grad.setAttribute("x2","100%");
+  grad.setAttribute("y1","0%"); grad.setAttribute("y2","100%");
+  const s1 = document.createElementNS(svg.namespaceURI,"stop"); s1.setAttribute("offset","0%");  s1.setAttribute("stop-color","#7dd3fc");
+  const s2 = document.createElementNS(svg.namespaceURI,"stop"); s2.setAttribute("offset","100%"); s2.setAttribute("stop-color","#10b981");
+  grad.appendChild(s1); grad.appendChild(s2);
+  defs.appendChild(grad);
+  svg.appendChild(defs);
+
+  const path = document.createElementNS(svg.namespaceURI, "path");
+  const d = reverse ? "M90 10 L10 90" : "M10 10 L90 90";
+  path.setAttribute("d", d);
+  path.setAttribute("fill","none");
+  path.setAttribute("stroke", `url(#${grad.id})`);
+  path.setAttribute("stroke-width","1.4");
+  path.setAttribute("class","arrow-line");
+  svg.appendChild(path);
+
+  // simple arrow head
+  const head = document.createElementNS(svg.namespaceURI, "path");
+  head.setAttribute("d", reverse ? "M12 90 L10 90 L10 88" : "M88 90 L90 90 L90 88");
+  head.setAttribute("stroke", `url(#${grad.id})`);
+  head.setAttribute("stroke-width","1.4");
+  head.setAttribute("fill","none");
+  svg.appendChild(head);
+
+  return svg;
+}
+
+function makeDuetCard({ imgSrc, alt, isFlower=false, flowerName="", song=null }){
+  const node = tpl.content.firstElementChild.cloneNode(true);
+  const frame = node.querySelector(".frame");
+  const frontImg = node.querySelector(".flip-front .card-img");
+  const controls = node.querySelector(".controls");
+  const btn = node.querySelector(".play-btn");
+  const range = node.querySelector(".seek-range");
+  const elaps = node.querySelector(".elapsed");
+  const dur = node.querySelector(".duration");
+  const viz = node.querySelector(".viz");
+
+  // Always hide flip & quotes for duets
+  const flipBtn = node.querySelector(".flip-btn");
+  const scrollBtn = node.querySelector(".scroll-btn");
+  if (flipBtn) flipBtn.style.display = "none";
+  if (scrollBtn) scrollBtn.style.display = "none";
+
+  // image
+  frontImg.src = imgSrc;
+  frontImg.alt = alt || "Artwork";
+
+  // Register to lightbox list and store index for open
+  const lbIndex = allImages.push({ src: imgSrc, alt }) - 1;
+
+  if (supportsHover && !prefersReduced) addTilt(frame);
+
+  if (isFlower){
+    node.classList.add("no-controls");
+    // caption chip
+    const cap = document.createElement("div");
+    cap.className = "flower-caption";
+    cap.textContent = flowerName || "";
+    frame.appendChild(cap);
+  } else {
+    // portrait with audio
+    const audio = new Audio(song || "");
+    audio.preload = "metadata";
+    audio.loop = true;
+    audioRefs.add(audio);
+
+    const stop = (e) => e.stopPropagation();
+    ["pointerdown","click"].forEach(ev => controls.addEventListener(ev, stop));
+    controls.addEventListener("touchstart", stop, { passive: true });
+    ["pointerdown","click"].forEach(ev => range.addEventListener(ev, stop));
+    range.addEventListener("touchstart", stop, { passive: true });
+    btn.addEventListener("pointerdown", stop);
+
+    const setUI = (on) => {
+      controls.classList.toggle("playing", on);
+      btn.classList.toggle("playing", on);
+      btn.setAttribute("aria-label", on ? "Pause" : "Play");
+    };
+
+    btn.addEventListener("click", () => {
+      if (!audio.src) return;
+      if (audio.paused) {
+        if (currentAudio && currentAudio !== audio){ currentAudio.pause(); }
+        currentAudio = audio;
+        audio.play().then(() => { setUI(true); useVisualizer(audio, viz, controls); }).catch(()=>{});
+      } else {
+        audio.pause(); setUI(false);
+        if (currentAudio === audio) currentAudio = null;
+      }
+    });
+    btn.addEventListener("keydown", (e) => {
+      if (e.key === "Enter" || e.key === " ") { e.preventDefault(); e.stopPropagation(); btn.click(); }
+    });
+
+    audio.addEventListener("loadedmetadata", () => {
+      dur.textContent = fmt(audio.duration);
+      range.max = audio.duration || 0;
+    });
+    audio.addEventListener("timeupdate", () => {
+      elaps.textContent = fmt(audio.currentTime);
+      if (!range.matches(":active")) {
+        range.value = audio.currentTime || 0;
+        const pct = audio.duration ? (audio.currentTime / audio.duration) * 100 : 0;
+        range.style.setProperty("--seek-pct", `${pct}%`);
+      }
+    });
+    audio.addEventListener("progress", () => {
+      try {
+        const b = audio.buffered;
+        if (b.length) {
+          const pct = audio.duration ? (b.end(b.length - 1) / audio.duration) * 100 : 0;
+          range.style.setProperty("--buffer-pct", `${pct}%`);
+        }
+      } catch {}
+    });
+    audio.addEventListener("pause", () => { setUI(false); if (currentAudio === audio) currentAudio = null; stopVisualizer(); });
+    audio.addEventListener("play", () => setUI(true));
+
+    range.addEventListener("input", () => {
+      const pct = audio.duration ? (range.value / audio.duration) * 100 : 0;
+      range.style.setProperty("--seek-pct", `${pct}%`);
+      audio.currentTime = Number(range.value || 0);
+      elaps.textContent = fmt(audio.currentTime);
+    });
+    range.addEventListener("change", () => { audio.currentTime = Number(range.value || 0); });
+  }
+
+  // Lightbox handler (don’t trigger from controls)
+  node.addEventListener("click", (e) => {
+    if (e.target.closest(".controls")) return;
+    openLightbox(lbIndex);
+  });
+  node.addEventListener("keydown", (e) => {
+    if (e.target.closest(".controls")) return;
+    if (e.key === "Enter" || e.key === " ") { e.preventDefault(); openLightbox(lbIndex); }
+  });
+
+  return node;
+}
+
+function renderDuets(){
+  if (!duetsGrid) return;
+  duetsData.forEach((pair, i) => {
+    const row = document.createElement("div");
+    row.className = "duet-row reveal";
+    row.setAttribute("aria-label", `${pair.flowerName} flower to ${pair.flowerName} portrait`);
+
+    const arrowWrap = document.createElement("div");
+    arrowWrap.className = "duet-arrow";
+    const reverse = (i % 2 === 1); // odd rows: portrait ← flower
+    arrowWrap.appendChild(makeArrowSVG(reverse));
+
+    const flowerCard = makeDuetCard({
+      imgSrc: pair.flowerSrc,
+      alt: pair.altFlower || `${pair.flowerName} photo`,
+      isFlower: true,
+      flowerName: pair.flowerName
+    });
+
+    const portraitCard = makeDuetCard({
+      imgSrc: pair.portraitSrc,
+      alt: pair.altPortrait || `${pair.flowerName} portrait`,
+      isFlower: false,
+      song: pair.song
+    });
+
+    if (!reverse){
+      // Flower → Portrait
+      row.appendChild(flowerCard);
+      row.appendChild(arrowWrap);
+      row.appendChild(portraitCard);
+    } else {
+      // Portrait ← Flower
+      row.appendChild(portraitCard);
+      row.appendChild(arrowWrap);
+      row.appendChild(flowerCard);
+    }
+
+    duetsGrid.appendChild(row);
+  });
+}
+
+// ---------- INIT ----------
+renderFeatured();
+renderGalleries();
+renderDuets();   // add duets before reveal setup
+revealOnScroll();
