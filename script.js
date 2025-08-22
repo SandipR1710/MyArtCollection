@@ -22,11 +22,10 @@ const songs = [
   "Tum_Hi_Ho.mp3",
 ];
 
-// This holds every image used in lightbox (base + duets). Keep base first (indexes 0..7).
+// Lightbox list: start with base images
 const allImages = [favorite, ...images];
 
-// ---------- DUETS DATA (flowers × portraits) ----------
-// Put your real file names/paths here:
+// ---------- DUETS DATA (keep exactly as requested) ----------
 const duetsData = [
   {
     flowerName: "Wild Rose",
@@ -235,7 +234,6 @@ function setupCard(node, idx, side){
   const noteText = node.querySelector(".note-text");
   const flipBtn = node.querySelector(".flip-btn");
   const frontImg = node.querySelector(".flip-front .card-img");
-  const noteBox = node.querySelector(".note");
 
   // set image
   const { src, alt } = allImages[idx];
@@ -348,7 +346,6 @@ function setupCard(node, idx, side){
 
   // ---- FLIP (favorite only) ----
   if (idx === 0){
-    // turn the note into multi-line poem with smooth animation
     const noteBox = node.querySelector('.note');
     noteBox.classList.add('note-poem');
     noteBox.style.overflow = 'visible';
@@ -361,14 +358,15 @@ function setupCard(node, idx, side){
 
     const onFlip = (e) => {
       e.stopPropagation();
-      flipInner.classList.toggle('flipped');
+      const inner = node.querySelector('.flip-inner');
+      inner.classList.toggle('flipped');
       const flipBtn = node.querySelector('.flip-btn');
-      flipBtn.setAttribute('aria-pressed', flipInner.classList.contains('flipped') ? 'true' : 'false');
+      flipBtn.setAttribute('aria-pressed', inner.classList.contains('flipped') ? 'true' : 'false');
     };
-    const flipBtn = node.querySelector(".flip-btn");
-    flipBtn.addEventListener('click', onFlip);
-    flipBtn.addEventListener('pointerdown', (e) => e.stopPropagation());
-    flipBtn.addEventListener('keydown', (e) => {
+    const fbtn = node.querySelector(".flip-btn");
+    fbtn.addEventListener('click', onFlip);
+    fbtn.addEventListener('pointerdown', (e) => e.stopPropagation());
+    fbtn.addEventListener('keydown', (e) => {
       if (e.key === "Enter" || e.key === " "){ e.preventDefault(); e.stopPropagation(); onFlip(e); }
     });
   } else {
@@ -476,7 +474,7 @@ lightbox.addEventListener("click", (e) => { if (e.target === lightbox) closeLigh
   tick();
 })();
 
-/* ===== Scroll-reveal ===== */
+/* ===== Reveal-on-scroll ===== */
 function revealOnScroll(){
   const items = document.querySelectorAll('.reveal');
   if (!items.length) return;
@@ -486,7 +484,7 @@ function revealOnScroll(){
   items.forEach(el => io.observe(el));
 }
 
-/* ===== Footer artist card alignment (JS-only precise corner match) ===== */
+/* ===== Footer artist card alignment (extra polish) ===== */
 (function fixFooterArtistCard(){
   const css = `
     .site-footer .artist-card .frame{
@@ -604,7 +602,6 @@ function makeArrowSVG(reverse=false){
   path.setAttribute("class","arrow-line");
   svg.appendChild(path);
 
-  // simple arrow head
   const head = document.createElementNS(svg.namespaceURI, "path");
   head.setAttribute("d", reverse ? "M12 90 L10 90 L10 88" : "M88 90 L90 90 L90 88");
   head.setAttribute("stroke", `url(#${grad.id})`);
@@ -626,7 +623,7 @@ function makeDuetCard({ imgSrc, alt, isFlower=false, flowerName="", song=null })
   const dur = node.querySelector(".duration");
   const viz = node.querySelector(".viz");
 
-  // Always hide flip & quotes for duets
+  // Hide flip & quotes on duets
   const flipBtn = node.querySelector(".flip-btn");
   const scrollBtn = node.querySelector(".scroll-btn");
   if (flipBtn) flipBtn.style.display = "none";
@@ -636,14 +633,13 @@ function makeDuetCard({ imgSrc, alt, isFlower=false, flowerName="", song=null })
   frontImg.src = imgSrc;
   frontImg.alt = alt || "Artwork";
 
-  // Register to lightbox list and store index for open
+  // add to global lightbox list
   const lbIndex = allImages.push({ src: imgSrc, alt }) - 1;
 
   if (supportsHover && !prefersReduced) addTilt(frame);
 
   if (isFlower){
     node.classList.add("no-controls");
-    // caption chip
     const cap = document.createElement("div");
     cap.className = "flower-caption";
     cap.textContent = flowerName || "";
@@ -756,12 +752,10 @@ function renderDuets(){
     });
 
     if (!reverse){
-      // Flower → Portrait
       row.appendChild(flowerCard);
       row.appendChild(arrowWrap);
       row.appendChild(portraitCard);
     } else {
-      // Portrait ← Flower
       row.appendChild(portraitCard);
       row.appendChild(arrowWrap);
       row.appendChild(flowerCard);
@@ -774,5 +768,46 @@ function renderDuets(){
 // ---------- INIT ----------
 renderFeatured();
 renderGalleries();
-renderDuets();   // add duets before reveal setup
+renderDuets();
 revealOnScroll();
+
+/* ===== Birthday Intro Overlay Logic ===== */
+(function birthdayIntro(){
+  const overlay = document.getElementById('birthday-overlay');
+  const btn = document.getElementById('open-surprise');
+  const confettiWrap = document.getElementById('confetti');
+  if (!overlay || !btn) return;
+
+  // Show overlay on first load
+  document.body.classList.add('intro-open');
+  overlay.removeAttribute('aria-hidden');
+
+  function burstConfetti(n = 140){
+    const colors = ['#7dd3fc','#38bdf8','#10b981','#f472b6','#c4b5fd','#facc15','#fb923c'];
+    for (let i = 0; i < n; i++){
+      const p = document.createElement('i');
+      p.className = 'confetti';
+      p.style.background = colors[i % colors.length];
+      p.style.setProperty('--dx', `${(Math.random()*2-1)*260}px`);
+      p.style.setProperty('--dy', `${- (Math.random()*220 + 120)}px`);
+      p.style.setProperty('--rot', `${Math.random()*720-360}deg`);
+      confettiWrap.appendChild(p);
+      setTimeout(() => p.remove(), 1000);
+    }
+  }
+
+  function openSurprise(){
+    burstConfetti();
+    overlay.classList.add('closing');
+    setTimeout(() => {
+      overlay.style.display = 'none';
+      document.body.classList.remove('intro-open');
+      overlay.setAttribute('aria-hidden','true');
+    }, 600);
+  }
+
+  btn.addEventListener('click', openSurprise);
+  btn.addEventListener('keydown', (e) => {
+    if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); openSurprise(); }
+  });
+})();

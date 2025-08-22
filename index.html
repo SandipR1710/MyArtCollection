@@ -7,9 +7,39 @@
   <link rel="stylesheet" href="styles.css" />
 </head>
 <body>
+  <!-- ===== Birthday Intro (overlay) ===== -->
+  <div id="birthday-overlay" class="intro-overlay" role="dialog" aria-labelledby="hb-title" aria-modal="true">
+    <div class="intro-inner">
+      <h1 id="hb-title" class="intro-title">
+        <span class="sparkle" aria-hidden="true"></span>
+        Happy Birthday!
+        <span class="sparkle" aria-hidden="true"></span>
+      </h1>
+      <p class="intro-sub">A little gallery surprise made just for you 💜</p>
+
+      <button id="open-surprise" class="intro-btn" type="button" aria-label="Open the birthday surprise">
+        <span class="btn-glow" aria-hidden="true"></span>
+        Surprise
+      </button>
+    </div>
+
+    <!-- Floating balloons -->
+    <div class="balloons" aria-hidden="true">
+      <span class="balloon b1"></span>
+      <span class="balloon b2"></span>
+      <span class="balloon b3"></span>
+      <span class="balloon b4"></span>
+      <span class="balloon b5"></span>
+    </div>
+
+    <!-- Confetti container -->
+    <div id="confetti" aria-hidden="true"></div>
+  </div>
+  <!-- ===== /Birthday Intro ===== -->
+
   <header class="site-header">
     <h1>Her Portraits</h1>
-    <p class="subtitle">Dark, calm gallery with a framed glow ✨</p>
+    <p class="subtitle">She and her magic ✨</p>
   </header>
 
   <!-- ===== Featured (purple glow) ===== -->
@@ -136,7 +166,6 @@
     <h2 class="section-title">WORDS FROM THE ARTIST FOR YOU</h2>
 
     <div class="footer-inner">
-      <!-- Small artist card (no controls/lightbox) -->
       <article class="card artist-card reveal">
         <div class="media">
           <div class="frame">
@@ -145,10 +174,8 @@
         </div>
       </article>
 
-      <!-- Animated text -->
       <div class="artist-words">
         <p id="artist-typed" class="typed gradient-text" aria-live="polite"></p>
-        <!-- caret intentionally removed -->
       </div>
     </div>
   </footer>
