@@ -27,78 +27,82 @@ export default function AudioProvider({ children }: { children: React.ReactNode 
   const howlRef = useRef<Howl | null>(null);
   const [muted, setMuted] = useState(false);
   const [currentSong, setCurrentSong] = useState<string | null>(null);
-  const analyserRef = useRef<AnalyserNode | null>(null);
+  // Use state (not just ref) so consumers re-render when analyser is ready
+  const [analyserNode, setAnalyserNode] = useState<AnalyserNode | null>(null);
   const audioCtxRef = useRef<AudioContext | null>(null);
-  const unlockedRef = useRef(false);
+  // Track which audio element is already connected (MediaElementSource is one-per-element)
+  const connectedNodes = useRef<WeakSet<HTMLMediaElement>>(new WeakSet());
+  const mutedRef = useRef(false);
 
   const setupAnalyser = useCallback((howl: Howl) => {
     try {
       // @ts-expect-error — Howler exposes _sounds internally
-      const node = howl._sounds?.[0]?._node;
+      const node: HTMLMediaElement | undefined = howl._sounds?.[0]?._node;
       if (!node) return;
 
       if (!audioCtxRef.current) {
-        audioCtxRef.current = new (window.AudioContext || (window as unknown as { webkitAudioContext: typeof AudioContext }).webkitAudioContext)();
+        const Ctx = window.AudioContext ?? (window as unknown as { webkitAudioContext: typeof AudioContext }).webkitAudioContext;
+        audioCtxRef.current = new Ctx();
       }
       const ctx = audioCtxRef.current;
       if (ctx.state === "suspended") ctx.resume();
 
-      const analyser = ctx.createAnalyser();
-      analyser.fftSize = 128;
-      const src = ctx.createMediaElementSource(node);
-      src.connect(analyser);
-      analyser.connect(ctx.destination);
-      analyserRef.current = analyser;
+      // Only create MediaElementSource once per element — calling it twice throws
+      if (!connectedNodes.current.has(node)) {
+        const analyser = ctx.createAnalyser();
+        analyser.fftSize = 128;
+        const src = ctx.createMediaElementSource(node);
+        src.connect(analyser);
+        analyser.connect(ctx.destination);
+        connectedNodes.current.add(node);
+        setAnalyserNode(analyser);
+      }
     } catch {
-      // Web Audio not available — orb will skip visualization
+      // Web Audio unavailable — orb animates via harmonics only
     }
   }, []);
 
   const playScene = useCallback(
     (songSrc: string) => {
-      if (!unlockedRef.current) {
-        unlockedRef.current = true;
-      }
-
+      // Fade out previous
       if (howlRef.current) {
         const prev = howlRef.current;
-        prev.fade(prev.volume(), 0, 800);
-        setTimeout(() => prev.unload(), 900);
+        prev.fade(prev.volume(), 0, 700);
+        setTimeout(() => prev.unload(), 800);
       }
 
+      const vol = mutedRef.current ? 0 : 0.55;
       const howl = new Howl({
         src: [songSrc],
         html5: true,
         loop: true,
-        volume: muted ? 0 : 0.55,
-        onplay: () => setupAnalyser(howl),
+        volume: 0,
+        onplay: () => {
+          howl.fade(0, vol, 800);
+          setupAnalyser(howl);
+        },
       });
 
       howl.play();
       howlRef.current = howl;
       setCurrentSong(songSrc);
     },
-    [muted, setupAnalyser]
+    [setupAnalyser]
   );
 
   const toggleMute = useCallback(() => {
     setMuted((m) => {
       const next = !m;
+      mutedRef.current = next;
       howlRef.current?.volume(next ? 0 : 0.55);
       return next;
     });
   }, []);
 
-  useEffect(() => {
-    return () => {
-      howlRef.current?.unload();
-    };
-  }, []);
+  useEffect(() => () => { howlRef.current?.unload(); }, []);
 
   return (
-    <AudioCtx.Provider
-      value={{ playScene, muted, toggleMute, currentSong, analyserNode: analyserRef.current }}
-    >
+    <AudioCtx.Provider value={{ playScene, muted, toggleMute, currentSong, analyserNode }}>
       {children}
     </AudioCtx.Provider>
   );

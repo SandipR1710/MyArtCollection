@@ -4,14 +4,11 @@ import { useEffect, useRef } from "react";
 import { gsap } from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import InkReveal, { type InkRevealHandle } from "@/components/shared/InkReveal";
+import { usePortraitSize } from "@/hooks/usePortraitSize";
 import { favoritePortrait } from "@/data/scenes";
 import { favoriteNoteLines } from "@/data/poems";
 
 gsap.registerPlugin(ScrollTrigger);
-
-// Dimensions used for both the img and InkReveal canvas
-const IMG_W = 340;
-const IMG_H = 480;
 
 export default function Scene01_Favorite() {
   const sectionRef = useRef<HTMLElement>(null);
@@ -21,6 +18,7 @@ export default function Scene01_Favorite() {
   const poemRef = useRef<HTMLDivElement>(null);
   const lineRefs = useRef<(HTMLSpanElement | null)[]>([]);
   const revealed = useRef(false);
+  const { w: IMG_W, h: IMG_H } = usePortraitSize(340, 480, 0.85);
 
   useEffect(() => {
     const ctx = gsap.context(() => {

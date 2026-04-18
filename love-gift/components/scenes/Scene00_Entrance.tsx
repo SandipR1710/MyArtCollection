@@ -9,38 +9,45 @@ import { favoritePortrait } from "@/data/scenes";
 
 gsap.registerPlugin(MorphSVGPlugin, SplitText);
 
+// The flower petal shape we morph FROM
+const FLOWER_PATH =
+  "M100,30 C115,30 135,50 140,70 C150,100 140,135 120,150 C108,158 92,158 80,150 C60,135 50,100 60,70 C65,50 85,30 100,30 Z";
+
+// Oval frame shape we morph TO (portrait frame)
+const OVAL_PATH =
+  "M100,12 C138,12 165,45 165,88 C165,131 138,168 100,168 C62,168 35,131 35,88 C35,45 62,12 100,12 Z";
+
 interface Props {
   onBegin: () => void;
 }
 
 export default function Scene00_Entrance({ onBegin }: Props) {
   const containerRef = useRef<HTMLDivElement>(null);
-  const svgRef = useRef<SVGSVGElement>(null);
   const titleRef = useRef<HTMLHeadingElement>(null);
   const btnRef = useRef<HTMLButtonElement>(null);
   const imgRef = useRef<HTMLImageElement>(null);
+  const morphPathRef = useRef<SVGPathElement>(null);
   const { playScene } = useAudio();
 
   useEffect(() => {
     const ctx = gsap.context(() => {
-      const tl = gsap.timeline({ defaults: { ease: "power2.inOut" } });
+      gsap.set([titleRef.current, btnRef.current, imgRef.current], { opacity: 0, y: 20 });
+      gsap.set(morphPathRef.current, { attr: { d: FLOWER_PATH } });
 
-      // Start with everything hidden
-      gsap.set([titleRef.current, btnRef.current], { opacity: 0, y: 30 });
-      gsap.set(imgRef.current, { opacity: 0 });
+      const tl = gsap.timeline({ delay: 0.3, defaults: { ease: "power2.inOut" } });
 
-      // Step 1: morph dot → flower petals → oval frame
-      tl.from("#morph-path", {
-        duration: 2.5,
-        morphSVG: { shape: "M 100 100 L 100 100 Z", type: "rotational" },
+      // 1. Draw flower → morph to oval frame
+      tl.to(morphPathRef.current, {
+        duration: 2,
+        morphSVG: OVAL_PATH,
         ease: "power1.inOut",
       })
-        // Step 2: portrait fades in behind the oval
-        .to(imgRef.current, { opacity: 1, duration: 1.2 }, "-=0.8")
-        // Step 3: title appears
+        // 2. Portrait fades in through the oval
+        .to(imgRef.current, { opacity: 1, y: 0, duration: 1 }, "-=0.5")
+        // 3. Title rises
         .to(titleRef.current, { opacity: 1, y: 0, duration: 0.9 }, "-=0.3")
-        // Step 4: begin button
-        .to(btnRef.current, { opacity: 1, y: 0, duration: 0.6 });
+        // 4. Begin button
+        .to(btnRef.current, { opacity: 1, y: 0, duration: 0.7 }, "-=0.2");
     }, containerRef);
 
     return () => ctx.revert();
@@ -50,7 +57,8 @@ export default function Scene00_Entrance({ onBegin }: Props) {
     playScene(favoritePortrait.song);
     gsap.to(containerRef.current, {
       opacity: 0,
-      duration: 0.8,
+      duration: 0.9,
+      ease: "power2.in",
       onComplete: onBegin,
     });
   };
@@ -58,51 +66,53 @@ export default function Scene00_Entrance({ onBegin }: Props) {
   return (
     <div
       ref={containerRef}
-      className="scene fixed inset-0 z-50 bg-[#06080d] flex flex-col items-center justify-center"
+      className="fixed inset-0 z-50 flex flex-col items-center justify-center bg-[#06080d]"
     >
-      {/* Morphing SVG shape */}
-      <svg
-        ref={svgRef}
-        viewBox="0 0 200 200"
-        className="absolute w-[min(60vw,400px)] h-[min(60vw,400px)] opacity-30 pointer-events-none"
-        aria-hidden="true"
-      >
-        <path
-          id="morph-path"
-          d="M100,20 C120,20 150,40 160,70 C175,110 155,150 130,165 C110,177 90,177 70,165 C45,150 25,110 40,70 C50,40 80,20 100,20 Z"
-          fill="none"
-          stroke="hsl(220,40%,60%)"
-          strokeWidth="1"
-        />
-      </svg>
+      {/* Morphing SVG — behind the portrait */}
+      <div className="absolute inset-0 flex items-center justify-center pointer-events-none" aria-hidden="true">
+        <svg viewBox="0 0 200 200" className="w-[min(70vw,440px)] h-[min(70vw,440px)] opacity-25">
+          <path
+            ref={morphPathRef}
+            d={FLOWER_PATH}
+            fill="none"
+            stroke="hsl(220, 50%, 65%)"
+            strokeWidth="1.2"
+          />
+        </svg>
+      </div>
 
-      {/* Portrait behind the morph */}
+      {/* Portrait clipped to oval */}
       {/* eslint-disable-next-line @next/next/no-img-element */}
       <img
         ref={imgRef}
         src={favoritePortrait.src}
         alt={favoritePortrait.alt}
-        className="absolute w-[min(55vw,380px)] h-[min(70vh,540px)] object-cover rounded-[2px] opacity-0"
-        style={{ clipPath: "ellipse(42% 48% at 50% 50%)" }}
+        className="absolute w-[min(52vw,360px)] h-[min(62vh,500px)] object-cover"
+        style={{
+          clipPath: "ellipse(42% 48% at 50% 50%)",
+          opacity: 0,
+        }}
       />
 
-      {/* Title */}
-      <h1
-        ref={titleRef}
-        className="entrance-title relative z-10 mt-[60vh]"
-      >
-        I drew this world for you
-      </h1>
+      {/* Title + button sit below the portrait */}
+      <div className="relative z-10 flex flex-col items-center mt-[58vh] gap-6">
+        <h1
+          ref={titleRef}
+          className="entrance-title text-center px-8"
+          style={{ opacity: 0 }}
+        >
+          I drew this world for you
+        </h1>
 
-      {/* Begin button */}
-      <button
-        ref={btnRef}
-        onClick={handleBegin}
-        className="relative z-10 mt-8 px-10 py-3 text-base tracking-widest uppercase font-light border border-white/20 rounded-full text-white/70 hover:text-white hover:border-white/50 transition-all duration-500 hover:shadow-[0_0_30px_rgba(255,255,255,0.1)]"
-        style={{ opacity: 0 }}
-      >
-        Begin
-      </button>
+        <button
+          ref={btnRef}
+          onClick={handleBegin}
+          className="px-10 py-3 text-sm tracking-[0.25em] uppercase font-light border border-white/20 rounded-full text-white/65 hover:text-white hover:border-white/45 transition-all duration-500 hover:shadow-[0_0_28px_rgba(255,255,255,0.08)]"
+          style={{ opacity: 0 }}
+        >
+          Begin
+        </button>
+      </div>
     </div>
   );
 }

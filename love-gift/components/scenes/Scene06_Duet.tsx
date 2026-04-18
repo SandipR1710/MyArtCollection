@@ -4,16 +4,14 @@ import { useEffect, useRef, useState } from "react";
 import { gsap } from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { DrawSVGPlugin } from "gsap/DrawSVGPlugin";
-import { motion, useInView } from "framer-motion";
+import { useInView } from "framer-motion";
 import InkReveal, { type InkRevealHandle } from "@/components/shared/InkReveal";
 import PetalSystem from "@/components/shared/PetalSystem";
+import { usePortraitSize } from "@/hooks/usePortraitSize";
 import { useAudio } from "@/components/providers/AudioProvider";
 import type { DuetData } from "@/data/duets";
 
 gsap.registerPlugin(ScrollTrigger, DrawSVGPlugin);
-
-const PORTRAIT_W = 380;
-const PORTRAIT_H = 500;
 
 interface Props {
   duet: DuetData;
@@ -28,6 +26,7 @@ export default function Scene06_Duet({ duet }: Props) {
   const inkRef = useRef<InkRevealHandle>(null);
   const { playScene } = useAudio();
   const isInView = useInView(sectionRef, { once: true, margin: "-20%" });
+  const { w: PORTRAIT_W, h: PORTRAIT_H } = usePortraitSize(380, 500, 0.88);
   const [petalActive, setPetalActive] = useState(false);
   const played = useRef(false);
 

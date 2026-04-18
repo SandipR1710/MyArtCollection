@@ -1,10 +1,11 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef } from "react";
 import { gsap } from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { motion } from "framer-motion";
 import InkReveal, { type InkRevealHandle } from "@/components/shared/InkReveal";
+import { usePortraitSize } from "@/hooks/usePortraitSize";
 import { useAudio } from "@/components/providers/AudioProvider";
 import type { PortraitScene } from "@/data/scenes";
 
@@ -28,7 +29,7 @@ export default function Scene02_Gallery({ portraits, sceneIndex }: Props) {
 function PortraitReveal({ portrait }: { portrait: PortraitScene }) {
   const ref = useRef<HTMLDivElement>(null);
   const inkRef = useRef<InkRevealHandle>(null);
-  const [dims] = useState({ w: 520, h: 640 });
+  const { w, h } = usePortraitSize(520, 640);
   const { playScene, currentSong } = useAudio();
   const revealed = useRef(false);
 
@@ -60,7 +61,7 @@ function PortraitReveal({ portrait }: { portrait: PortraitScene }) {
       {/* Portrait with ink-reveal */}
       <div
         className="portrait-wrap relative"
-        style={{ width: dims.w, height: dims.h }}
+        style={{ width: w, height: h }}
       >
         {/* eslint-disable-next-line @next/next/no-img-element */}
         <img
@@ -68,7 +69,7 @@ function PortraitReveal({ portrait }: { portrait: PortraitScene }) {
           alt={portrait.alt}
           className="w-full h-full object-cover rounded-[1px]"
         />
-        <InkReveal ref={inkRef} width={dims.w} height={dims.h} />
+        <InkReveal ref={inkRef} width={w} height={h} />
       </div>
 
       {/* Floating quote */}

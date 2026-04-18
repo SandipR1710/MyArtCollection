@@ -179,6 +179,16 @@ html.lenis, html.lenis body {
   padding: 2rem;
 }
 
+@media (max-width: 640px) {
+  .duet-layout {
+    grid-template-columns: 1fr;
+    grid-template-rows: auto auto auto;
+    justify-items: center;
+    gap: 2rem;
+    padding: 1.5rem 1rem;
+  }
+}
+
 /* ─── Artist constellation ───────────────────────────────────────────── */
 .constellation-dot {
   position: absolute;
