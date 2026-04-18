@@ -53,8 +53,8 @@ export default function Scene06_Duet({ duet }: Props) {
       // 1. Flower slides in from left
       tl.fromTo(
         flowerRef.current,
-        { x: -60, opacity: 0, filter: "blur(12px) saturate(0.3)" },
-        { x: 0, opacity: 1, filter: "blur(0px) saturate(0.88)", duration: 1.0 }
+        { x: -60, opacity: 0 },
+        { x: 0, opacity: 1, duration: 1.0 }
       )
         // 2. Vine draws
         .fromTo(

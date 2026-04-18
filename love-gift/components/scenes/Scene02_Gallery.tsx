@@ -39,8 +39,8 @@ function PortraitReveal({ portrait, index }: { portrait: PortraitScene; index: n
   return (
     <div
       ref={ref}
-      className="relative flex flex-col items-center justify-center py-24"
-      style={{ minHeight: "100vh" }}
+      className="relative flex flex-col items-center justify-center py-12"
+      style={{ minHeight: "85vh" }}
     >
       {/* Subtle scene glow */}
       <div
@@ -56,17 +56,17 @@ function PortraitReveal({ portrait, index }: { portrait: PortraitScene; index: n
       >
         {/* Portrait frame */}
         <motion.div
-          initial={{ opacity: 0, y: 36, filter: "blur(18px)" }}
-          animate={isInView ? { opacity: 1, y: 0, filter: "blur(0px)" } : {}}
-          transition={{ duration: 1.4, ease: [0.22, 1, 0.36, 1] }}
+          initial={{ opacity: 0, y: 40 }}
+          animate={isInView ? { opacity: 1, y: 0 } : {}}
+          transition={{ duration: 1.2, ease: [0.22, 1, 0.36, 1] }}
           className="portrait-wrap relative"
           style={{ width: w, height: h }}
         >
-          {/* Paper border frame */}
+          {/* Frame: outer glow + inner border */}
           <div
             className="absolute inset-0 rounded-[2px] pointer-events-none z-10"
             style={{
-              boxShadow: "inset 0 0 0 1px rgba(240,236,228,0.08), 0 0 60px 12px rgba(0,0,0,0.55)",
+              boxShadow: "inset 0 0 0 1px rgba(240,236,228,0.10), 0 8px 40px 8px rgba(0,0,0,0.75), 0 0 80px 20px rgba(0,0,0,0.5)",
             }}
           />
           {/* eslint-disable-next-line @next/next/no-img-element */}
