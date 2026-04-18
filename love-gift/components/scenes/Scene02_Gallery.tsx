@@ -1,9 +1,10 @@
 "use client";
 
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import { gsap } from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { motion } from "framer-motion";
+import InkReveal, { type InkRevealHandle } from "@/components/shared/InkReveal";
 import { useAudio } from "@/components/providers/AudioProvider";
 import type { PortraitScene } from "@/data/scenes";
 
@@ -11,68 +12,44 @@ gsap.registerPlugin(ScrollTrigger);
 
 interface Props {
   portraits: PortraitScene[];
-  sceneIndex: number; // 2, 3, or 4
+  sceneIndex: number;
 }
 
 export default function Scene02_Gallery({ portraits, sceneIndex }: Props) {
-  const sectionRef = useRef<HTMLElement>(null);
-  const { playScene, currentSong } = useAudio();
-
   return (
-    <section
-      ref={sectionRef}
-      className="relative"
-      aria-label={`Gallery section ${sceneIndex}`}
-    >
-      {portraits.map((portrait, i) => (
-        <PortraitReveal
-          key={portrait.src}
-          portrait={portrait}
-          index={i}
-          onEnter={() => {
-            if (currentSong !== portrait.song) playScene(portrait.song);
-          }}
-        />
+    <section aria-label={`Gallery section ${sceneIndex}`}>
+      {portraits.map((portrait) => (
+        <PortraitReveal key={portrait.src} portrait={portrait} />
       ))}
     </section>
   );
 }
 
-function PortraitReveal({
-  portrait,
-  index,
-  onEnter,
-}: {
-  portrait: PortraitScene;
-  index: number;
-  onEnter: () => void;
-}) {
+function PortraitReveal({ portrait }: { portrait: PortraitScene }) {
   const ref = useRef<HTMLDivElement>(null);
-  const imgRef = useRef<HTMLImageElement>(null);
+  const inkRef = useRef<InkRevealHandle>(null);
+  const [dims] = useState({ w: 520, h: 640 });
+  const { playScene, currentSong } = useAudio();
+  const revealed = useRef(false);
 
   useEffect(() => {
     const ctx = gsap.context(() => {
-      // Ink-wash reveal: image starts very blurred + transparent, a radial mask expands
-      gsap.set(imgRef.current, { opacity: 0, filter: "blur(30px) saturate(0.3)" });
-
       ScrollTrigger.create({
         trigger: ref.current,
-        start: "top 65%",
-        onEnter: () => {
-          onEnter();
-          gsap.to(imgRef.current, {
-            opacity: 1,
-            filter: "blur(0px) saturate(1)",
-            duration: 1.8,
-            ease: "power2.out",
-          });
-        },
+        start: "top 60%",
         once: true,
+        onEnter: () => {
+          if (revealed.current) return;
+          revealed.current = true;
+          if (currentSong !== portrait.song) playScene(portrait.song);
+          inkRef.current?.reveal(2000);
+        },
       });
     }, ref);
 
     return () => ctx.revert();
-  }, [onEnter]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   return (
     <div
@@ -80,30 +57,39 @@ function PortraitReveal({
       className="scene flex flex-col items-center justify-center py-20"
       style={{ minHeight: "100vh" }}
     >
-      {/* Portrait */}
-      <div className="portrait-wrap relative">
+      {/* Portrait with ink-reveal */}
+      <div
+        className="portrait-wrap relative"
+        style={{ width: dims.w, height: dims.h }}
+      >
         {/* eslint-disable-next-line @next/next/no-img-element */}
         <img
-          ref={imgRef}
           src={portrait.src}
           alt={portrait.alt}
-          className="w-[min(72vw,520px)] h-[min(80vh,640px)] object-cover rounded-[1px]"
+          className="w-full h-full object-cover rounded-[1px]"
         />
+        <InkReveal ref={inkRef} width={dims.w} height={dims.h} />
       </div>
 
-      {/* Floating quote if present */}
+      {/* Floating quote */}
       {portrait.quote && (
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           whileInView={{ opacity: 1, y: 0 }}
-          transition={{ duration: 1, delay: 0.6 }}
+          transition={{ duration: 1.2, delay: 1.4 }}
           viewport={{ once: true }}
           className="mt-10 text-center max-w-sm px-4"
         >
-          <p className="font-[family-name:var(--font-caveat)] text-2xl text-white/60 leading-relaxed">
+          <p
+            className="text-white/60 leading-relaxed"
+            style={{ fontFamily: "var(--font-caveat), cursive", fontSize: "clamp(1.3rem, 2.5vw, 1.8rem)" }}
+          >
             {portrait.quote[0]}
           </p>
-          <p className="font-[family-name:var(--font-caveat)] text-xl text-white/40 mt-2 leading-relaxed">
+          <p
+            className="text-white/35 mt-2 leading-relaxed"
+            style={{ fontFamily: "var(--font-caveat), cursive", fontSize: "clamp(1.1rem, 2vw, 1.5rem)" }}
+          >
             {portrait.quote[1]}
           </p>
         </motion.div>

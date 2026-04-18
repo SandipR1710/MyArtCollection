@@ -54,11 +54,24 @@ html.lenis, html.lenis body {
 /* ─── Scene background gradient ─────────────────────────────────────── */
 .scene-bg {
   background: radial-gradient(
-    ellipse 120% 80% at 50% 0%,
-    hsl(var(--scene-h), 25%, 12%) 0%,
-    var(--background) 70%
+    ellipse 140% 90% at 50% 0%,
+    hsl(var(--scene-h), 28%, 13%) 0%,
+    hsl(var(--scene-h), 10%, 7%) 55%,
+    var(--background) 100%
   );
-  transition: background 1.2s ease;
+}
+
+/* CSS var transitions — animate on :root when JS updates --scene-h */
+:root {
+  transition:
+    --scene-h 1.2s ease,
+    --scene-s 1.2s ease,
+    --scene-l 1.2s ease;
+}
+
+@supports not (transition: --scene-h 1s) {
+  /* Fallback for browsers without custom property transitions */
+  .scene-bg { transition: none; }
 }
 
 /* ─── Paper texture overlay for portraits ───────────────────────────── */

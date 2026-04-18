@@ -1,14 +1,19 @@
 "use client";
 
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import { gsap } from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { DrawSVGPlugin } from "gsap/DrawSVGPlugin";
 import { motion, useInView } from "framer-motion";
+import InkReveal, { type InkRevealHandle } from "@/components/shared/InkReveal";
+import PetalSystem from "@/components/shared/PetalSystem";
 import { useAudio } from "@/components/providers/AudioProvider";
 import type { DuetData } from "@/data/duets";
 
 gsap.registerPlugin(ScrollTrigger, DrawSVGPlugin);
+
+const PORTRAIT_W = 380;
+const PORTRAIT_H = 500;
 
 interface Props {
   duet: DuetData;
@@ -17,17 +22,22 @@ interface Props {
 export default function Scene06_Duet({ duet }: Props) {
   const sectionRef = useRef<HTMLElement>(null);
   const flowerRef = useRef<HTMLDivElement>(null);
-  const portraitRef = useRef<HTMLDivElement>(null);
+  const portraitWrapRef = useRef<HTMLDivElement>(null);
   const vineRef = useRef<SVGPathElement>(null);
   const songTitleRef = useRef<HTMLSpanElement>(null);
-  const { playScene, currentSong } = useAudio();
+  const inkRef = useRef<InkRevealHandle>(null);
+  const { playScene } = useAudio();
   const isInView = useInView(sectionRef, { once: true, margin: "-20%" });
+  const [petalActive, setPetalActive] = useState(false);
+  const played = useRef(false);
 
-  // Set CSS vars for scene palette when in view
+  // Activate palette + audio when scene enters view
   useEffect(() => {
-    if (!isInView) return;
+    if (!isInView || played.current) return;
+    played.current = true;
     document.documentElement.style.setProperty("--scene-h", duet.palette);
     playScene(duet.song);
+    setPetalActive(true);
   }, [isInView, duet.palette, duet.song, playScene]);
 
   useEffect(() => {
@@ -35,37 +45,40 @@ export default function Scene06_Duet({ duet }: Props) {
       const tl = gsap.timeline({
         scrollTrigger: {
           trigger: sectionRef.current,
-          start: "top 50%",
+          start: "top 55%",
           once: true,
         },
+        defaults: { ease: "power3.out" },
       });
 
-      // Flower slides in from left
+      // 1. Flower slides in from left
       tl.fromTo(
         flowerRef.current,
-        { x: -80, opacity: 0, filter: "blur(10px) saturate(0.4)" },
-        { x: 0, opacity: 1, filter: "blur(0px) saturate(0.85)", duration: 1.1, ease: "power3.out" }
+        { x: -60, opacity: 0, filter: "blur(12px) saturate(0.3)" },
+        { x: 0, opacity: 1, filter: "blur(0px) saturate(0.88)", duration: 1.0 }
       )
-        // Vine draws from flower to portrait
+        // 2. Vine draws
         .fromTo(
           vineRef.current,
           { drawSVG: "0%" },
-          { drawSVG: "100%", duration: 1.5, ease: "power1.inOut" },
-          "-=0.3"
+          { drawSVG: "100%", duration: 1.4, ease: "power1.inOut" },
+          "-=0.4"
         )
-        // Song title floats up along vine center
+        // 3. Song title
         .fromTo(
           songTitleRef.current,
-          { opacity: 0, y: 8 },
-          { opacity: 1, y: 0, duration: 0.7 },
-          "-=0.8"
+          { opacity: 0, y: 6 },
+          { opacity: 1, y: 0, duration: 0.6 },
+          "-=0.9"
         )
-        // Portrait reveals (ink wash)
+        // 4. Portrait ink reveal fires
+        .add(() => inkRef.current?.reveal(1800), "-=0.8")
+        // 5. Portrait wrapper slides in
         .fromTo(
-          portraitRef.current,
-          { opacity: 0, filter: "blur(20px) saturate(0.2)", x: 40 },
-          { opacity: 1, filter: "blur(0px) saturate(1)", x: 0, duration: 1.4, ease: "power2.out" },
-          "-=1.0"
+          portraitWrapRef.current,
+          { x: 50, opacity: 0 },
+          { x: 0, opacity: 1, duration: 1.2 },
+          "-=1.6"
         );
     }, sectionRef);
 
@@ -73,20 +86,22 @@ export default function Scene06_Duet({ duet }: Props) {
   }, []);
 
   const songDisplayName = duet.song
-    .split("/")
-    .pop()!
+    .split("/").pop()!
     .replace(".mp3", "")
     .replace(/_/g, " ");
 
   return (
     <section
       ref={sectionRef}
-      className="scene scene-bg py-24"
+      className="scene scene-bg relative overflow-hidden py-24"
       aria-label={`${duet.flowerName} duet`}
     >
-      <div className="duet-layout">
+      {/* Petal rain — rendered behind content */}
+      <PetalSystem hue={Number(duet.palette)} active={petalActive} />
+
+      <div className="duet-layout relative z-10">
         {/* Flower */}
-        <div ref={flowerRef} className="portrait-wrap justify-self-end">
+        <div ref={flowerRef} className="portrait-wrap justify-self-end" style={{ opacity: 0 }}>
           {/* eslint-disable-next-line @next/next/no-img-element */}
           <img
             src={duet.flowerSrc}
@@ -94,45 +109,51 @@ export default function Scene06_Duet({ duet }: Props) {
             className="w-full max-w-[380px] h-[min(65vh,500px)] object-cover rounded-[1px]"
           />
           <p
-            className="mt-3 text-center text-sm tracking-widest uppercase opacity-50"
-            style={{ fontFamily: "var(--font-caveat), cursive", fontSize: "1rem" }}
+            className="mt-3 text-center tracking-widest uppercase opacity-50"
+            style={{ fontFamily: "var(--font-caveat), cursive", fontSize: "1.05rem" }}
           >
             {duet.flowerName}
           </p>
         </div>
 
         {/* Vine connector */}
-        <div className="relative flex items-center justify-center h-full">
-          <svg
-            viewBox="0 0 80 400"
-            className="vine-svg h-64 w-20"
-            aria-hidden="true"
-          >
+        <div className="relative flex items-center justify-center">
+          <svg viewBox="0 0 80 400" className="vine-svg h-64 w-16" aria-hidden="true">
             <path
               ref={vineRef}
               d="M40,10 C40,100 40,220 40,390"
               className="vine-path"
-              strokeDasharray="none"
             />
           </svg>
-          {/* Song title at midpoint */}
           <span
             ref={songTitleRef}
-            className="absolute text-xs tracking-wider uppercase text-white/50 text-center leading-tight max-w-[70px]"
-            style={{ fontFamily: "var(--font-cormorant), serif", fontSize: "0.7rem", opacity: 0 }}
+            className="absolute text-center leading-snug"
+            style={{
+              fontFamily: "var(--font-cormorant), serif",
+              fontSize: "0.68rem",
+              letterSpacing: "0.08em",
+              color: "var(--glow-color)",
+              opacity: 0,
+              maxWidth: 66,
+            }}
           >
             {songDisplayName}
           </span>
         </div>
 
-        {/* Portrait */}
-        <div ref={portraitRef} className="portrait-wrap">
+        {/* Portrait with ink reveal */}
+        <div
+          ref={portraitWrapRef}
+          className="portrait-wrap relative"
+          style={{ width: PORTRAIT_W, height: PORTRAIT_H, opacity: 0 }}
+        >
           {/* eslint-disable-next-line @next/next/no-img-element */}
           <img
             src={duet.portraitSrc}
             alt={duet.altPortrait}
-            className="w-full max-w-[380px] h-[min(65vh,500px)] object-cover rounded-[1px]"
+            className="w-full h-full object-cover rounded-[1px]"
           />
+          <InkReveal ref={inkRef} width={PORTRAIT_W} height={PORTRAIT_H} />
         </div>
       </div>
     </section>
