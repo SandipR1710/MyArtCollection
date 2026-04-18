@@ -15,9 +15,11 @@ gsap.registerPlugin(TextPlugin, DrawSVGPlugin, ScrollTrigger);
 const allPortraits = [favoritePortrait, ...galleryPortraits];
 
 // Ellipse layout: 14 thumbnails arranged around a central artist photo
-const ELLIPSE_RX = 260; // horizontal radius (px)
-const ELLIPSE_RY = 180; // vertical radius (px)
-const DOT_SIZE = 56;    // thumbnail size (px)
+// Using smaller radii so the whole thing fits inside most viewports
+const ELLIPSE_RX = 230;
+const ELLIPSE_RY = 160;
+const DOT_SIZE   = 52;
+const PAD        = DOT_SIZE; // padding so edge dots don't clip
 
 const POSITIONS = allPortraits.map((_, i) => {
   const angle = (i / allPortraits.length) * Math.PI * 2 - Math.PI / 2;
@@ -27,10 +29,15 @@ const POSITIONS = allPortraits.map((_, i) => {
   };
 });
 
-// SVG paths connecting each constellation dot to center
+// Center of the SVG coordinate space
+const CX = ELLIPSE_RX + PAD;
+const CY = ELLIPSE_RY + PAD;
+const SVG_W = CX * 2;
+const SVG_H = CY * 2;
+
 function buildConstellationPaths(): string[] {
   return POSITIONS.map(
-    (p) => `M ${ELLIPSE_RX + 20} ${ELLIPSE_RY + 20} L ${ELLIPSE_RX + 20 + p.x} ${ELLIPSE_RY + 20 + p.y}`
+    (p) => `M ${CX} ${CY} L ${CX + p.x} ${CY + p.y}`
   );
 }
 
@@ -77,25 +84,27 @@ export default function Scene12_Artist() {
     return () => ctx.revert();
   }, [isInView, playScene]);
 
-  const svgW = (ELLIPSE_RX + 20) * 2 + DOT_SIZE;
-  const svgH = (ELLIPSE_RY + 20) * 2 + DOT_SIZE;
-
   return (
     <section
       ref={sectionRef}
-      className="relative flex flex-col items-center justify-center py-28 overflow-hidden"
+      className="relative flex flex-col items-center justify-center py-28"
       style={{ minHeight: "180vh", background: "var(--background)" }}
       aria-label="The artist"
     >
       {/* Constellation: SVG lines + portrait thumbnails */}
-      <div className="relative flex items-center justify-center" style={{ width: svgW, height: svgH }}>
+      <div
+        className="relative"
+        style={{ width: SVG_W, height: SVG_H, maxWidth: "95vw", overflow: "visible" }}
+      >
 
         {/* SVG lines */}
         <svg
           ref={svgRef}
-          width={svgW}
-          height={svgH}
+          viewBox={`0 0 ${SVG_W} ${SVG_H}`}
+          width={SVG_W}
+          height={SVG_H}
           className="absolute inset-0 pointer-events-none"
+          style={{ overflow: "visible" }}
           aria-hidden="true"
         >
           {buildConstellationPaths().map((d, i) => (
@@ -124,8 +133,8 @@ export default function Scene12_Artist() {
               position: "absolute",
               width: DOT_SIZE,
               height: DOT_SIZE,
-              left: ELLIPSE_RX + 20 + POSITIONS[i].x - DOT_SIZE / 2,
-              top:  ELLIPSE_RY + 20 + POSITIONS[i].y - DOT_SIZE / 2,
+              left: CX + POSITIONS[i].x - DOT_SIZE / 2,
+              top:  CY + POSITIONS[i].y - DOT_SIZE / 2,
             }}
           >
             {/* eslint-disable-next-line @next/next/no-img-element */}
