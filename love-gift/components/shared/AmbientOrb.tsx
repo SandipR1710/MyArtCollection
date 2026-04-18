@@ -18,7 +18,7 @@ export default function AmbientOrb() {
     const canvas = canvasRef.current;
     if (!canvas) return;
     const ctx = canvas.getContext("2d")!;
-    const SIZE = 52;
+    const SIZE = 88;
     canvas.width = SIZE;
     canvas.height = SIZE;
     const cx = SIZE / 2;
@@ -37,8 +37,8 @@ export default function AmbientOrb() {
         analyserNode.getByteTimeDomainData(dataArray);
       }
 
-      const points = 32;
-      const baseR = 17;
+      const points = 48;
+      const baseR = 26;
       ctx.beginPath();
       for (let i = 0; i <= points; i++) {
         const angle = (i / points) * Math.PI * 2;
@@ -48,9 +48,10 @@ export default function AmbientOrb() {
           audioAmp = (dataArray[idx] - 128) / 128;
         }
         const drift =
-          Math.sin(angle * 3 + tick * 0.018) * 2.2 +
-          Math.cos(angle * 5 - tick * 0.012) * 1.4;
-        const r = baseR + drift + audioAmp * 7;
+          Math.sin(angle * 3 + tick * 0.016) * 4.5 +
+          Math.cos(angle * 5 - tick * 0.011) * 2.8 +
+          Math.sin(angle * 7 + tick * 0.009) * 1.2;
+        const r = baseR + drift + audioAmp * 14;
         const x = cx + Math.cos(angle) * r;
         const y = cx + Math.sin(angle) * r;
         i === 0 ? ctx.moveTo(x, y) : ctx.lineTo(x, y);
@@ -59,18 +60,23 @@ export default function AmbientOrb() {
 
       const sceneH = getComputedStyle(document.documentElement)
         .getPropertyValue("--scene-h").trim() || "220";
-      const alpha = muted ? 0.18 : 0.5;
-      const strokeAlpha = muted ? 0.12 : 0.65;
+      const alpha = muted ? 0.12 : 0.55;
+      const strokeAlpha = muted ? 0.10 : 0.80;
 
-      const grad = ctx.createRadialGradient(cx, cx, 2, cx, cx, baseR + 9);
-      grad.addColorStop(0, `hsla(${sceneH}, 65%, 72%, ${alpha})`);
-      grad.addColorStop(1, `hsla(${sceneH}, 30%, 30%, 0.05)`);
+      /* outer glow — two passes */
+      ctx.save();
+      ctx.shadowColor = `hsla(${sceneH}, 70%, 65%, ${muted ? 0.08 : 0.5})`;
+      ctx.shadowBlur = muted ? 6 : 18;
+      const grad = ctx.createRadialGradient(cx, cx, 3, cx, cx, baseR + 14);
+      grad.addColorStop(0, `hsla(${sceneH}, 75%, 78%, ${alpha})`);
+      grad.addColorStop(0.55, `hsla(${sceneH}, 55%, 55%, ${alpha * 0.6})`);
+      grad.addColorStop(1, `hsla(${sceneH}, 30%, 30%, 0.0)`);
       ctx.fillStyle = grad;
       ctx.fill();
-      ctx.strokeStyle = `hsla(${sceneH}, 55%, 72%, ${strokeAlpha})`;
-      ctx.lineWidth = 1.2;
+      ctx.strokeStyle = `hsla(${sceneH}, 65%, 80%, ${strokeAlpha})`;
+      ctx.lineWidth = 1.5;
       ctx.stroke();
-    };
+      ctx.restore();
 
     draw();
     return () => cancelAnimationFrame(rafRef.current);

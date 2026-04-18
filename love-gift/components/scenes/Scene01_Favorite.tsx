@@ -17,9 +17,9 @@ export default function Scene01_Favorite() {
   const lineRefs   = useRef<(HTMLSpanElement | null)[]>([]);
   const { w: IMG_W, h: IMG_H } = usePortraitSize(340, 480, 0.85);
 
-  // Trigger ink reveal shortly after mount (portrait should appear quickly)
+  // Trigger ink reveal shortly after mount
   useEffect(() => {
-    const t = setTimeout(() => inkRef.current?.reveal(2000), 400);
+    const t = setTimeout(() => inkRef.current?.reveal(1600), 350);
     return () => clearTimeout(t);
   }, []);
 

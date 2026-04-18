@@ -107,9 +107,18 @@ export default function Scene00_Entrance({ onBegin }: Props) {
         ref={btnRef}
         onClick={handleBegin}
         style={{ opacity: 0 }}
-        className="px-10 py-3 text-xs tracking-[0.3em] uppercase font-light border border-white/20 rounded-full text-white/60 hover:text-white hover:border-white/50 transition-all duration-500"
+        className="group relative px-14 py-4 text-sm tracking-[0.35em] uppercase font-light text-white/80 hover:text-white transition-all duration-700 overflow-hidden"
       >
-        Begin
+        {/* Glow border */}
+        <span
+          className="absolute inset-0 rounded-full border border-white/25 group-hover:border-white/60 transition-all duration-700"
+          style={{ boxShadow: "0 0 24px 2px hsla(220,60%,65%,0.12)" }}
+        />
+        {/* Hover glow fill */}
+        <span className="absolute inset-0 rounded-full opacity-0 group-hover:opacity-100 transition-opacity duration-700"
+          style={{ background: "radial-gradient(ellipse at 50% 120%, hsla(220,60%,55%,0.18) 0%, transparent 70%)" }}
+        />
+        <span className="relative">Begin</span>
       </button>
     </div>
   );
