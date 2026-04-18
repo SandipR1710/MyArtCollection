@@ -1,0 +1,5 @@
+{
+  "buildCommand": "cd love-gift && npm install && npm run build",
+  "outputDirectory": "love-gift/out",
+  "installCommand": "echo 'install handled in buildCommand'"
+}
