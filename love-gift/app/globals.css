@@ -1,0 +1,200 @@
+@import "tailwindcss";
+
+/* ─── Scene-driven CSS custom properties ───────────────────────────── */
+:root {
+  --scene-h: 220;
+  --scene-s: 15%;
+  --scene-l: 8%;
+  --scene-hue: hsl(var(--scene-h), var(--scene-s), var(--scene-l));
+
+  --petal-color: hsl(var(--scene-h), 60%, 70%);
+  --ink-color: hsl(var(--scene-h), 30%, 20%);
+  --glow-color: hsl(var(--scene-h), 70%, 50%);
+  --paper-grain: 0.015;
+
+  --background: #06080d;
+  --foreground: #f0ece4;
+}
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+}
+
+/* ─── Base ──────────────────────────────────────────────────────────── */
+*, *::before, *::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+html {
+  scroll-behavior: auto; /* Lenis handles smooth scroll */
+  overflow-x: hidden;
+}
+
+body {
+  background: var(--background);
+  color: var(--foreground);
+  font-family: var(--font-cormorant), Georgia, serif;
+  overflow-x: hidden;
+}
+
+/* ─── Lenis ─────────────────────────────────────────────────────────── */
+html.lenis, html.lenis body {
+  height: auto;
+}
+.lenis.lenis-smooth {
+  scroll-behavior: auto !important;
+}
+.lenis.lenis-smooth [data-lenis-prevent] {
+  overscroll-behavior: contain;
+}
+
+/* ─── Scene background gradient ─────────────────────────────────────── */
+.scene-bg {
+  background: radial-gradient(
+    ellipse 120% 80% at 50% 0%,
+    hsl(var(--scene-h), 25%, 12%) 0%,
+    var(--background) 70%
+  );
+  transition: background 1.2s ease;
+}
+
+/* ─── Paper texture overlay for portraits ───────────────────────────── */
+.portrait-wrap {
+  position: relative;
+  display: inline-block;
+}
+.portrait-wrap::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  border-radius: inherit;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='200' height='200'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='200' height='200' filter='url(%23n)' opacity='0.04'/%3E%3C/svg%3E");
+  background-repeat: repeat;
+  mix-blend-mode: overlay;
+  opacity: 0.45;
+}
+
+/* ─── Ink-reveal canvas placeholder ─────────────────────────────────── */
+.ink-canvas {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  border-radius: inherit;
+}
+
+/* ─── Ambient orb ────────────────────────────────────────────────────── */
+.ambient-orb {
+  position: fixed;
+  bottom: 2rem;
+  right: 2rem;
+  z-index: 100;
+  width: 52px;
+  height: 52px;
+  cursor: pointer;
+  border-radius: 50%;
+}
+
+/* ─── Poem / handwriting text ────────────────────────────────────────── */
+.poem-line {
+  font-family: var(--font-caveat), cursive;
+  font-size: clamp(1.4rem, 3vw, 2.2rem);
+  line-height: 1.5;
+  color: var(--foreground);
+  opacity: 0;
+}
+
+.poem-line.visible {
+  opacity: 1;
+}
+
+/* ─── Section / scene base ───────────────────────────────────────────── */
+.scene {
+  position: relative;
+  width: 100%;
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+}
+
+.scene-pin {
+  position: sticky;
+  top: 0;
+  height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* ─── Entrance title ─────────────────────────────────────────────────── */
+.entrance-title {
+  font-family: var(--font-cormorant), Georgia, serif;
+  font-size: clamp(2rem, 6vw, 5rem);
+  font-weight: 300;
+  letter-spacing: 0.08em;
+  text-align: center;
+  color: var(--foreground);
+  line-height: 1.2;
+}
+
+/* ─── Vine / connector SVG ───────────────────────────────────────────── */
+.vine-svg {
+  overflow: visible;
+  pointer-events: none;
+}
+.vine-path {
+  fill: none;
+  stroke: var(--glow-color);
+  stroke-width: 1.5;
+  stroke-linecap: round;
+  opacity: 0.7;
+}
+
+/* ─── Duet scene layout ──────────────────────────────────────────────── */
+.duet-layout {
+  display: grid;
+  grid-template-columns: 1fr 80px 1fr;
+  align-items: center;
+  gap: 1.5rem;
+  width: 100%;
+  max-width: 1100px;
+  padding: 2rem;
+}
+
+/* ─── Artist constellation ───────────────────────────────────────────── */
+.constellation-dot {
+  position: absolute;
+  width: 60px;
+  height: 60px;
+  border-radius: 50%;
+  overflow: hidden;
+  cursor: pointer;
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+.constellation-dot:hover {
+  transform: scale(1.3);
+  box-shadow: 0 0 20px var(--glow-color);
+}
+
+/* ─── Interlude text ─────────────────────────────────────────────────── */
+.interlude-line {
+  font-family: var(--font-cormorant), Georgia, serif;
+  font-weight: 300;
+  text-align: center;
+  opacity: 0;
+  transform: translateY(20px);
+}
+
+/* ─── Reduce motion fallback ─────────────────────────────────────────── */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
