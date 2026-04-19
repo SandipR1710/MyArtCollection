@@ -15,7 +15,7 @@ interface Props {
 export default function Scene05_Interlude({ nextSong }: Props) {
   const sectionRef = useRef<HTMLElement>(null);
   const linesRef = useRef<(HTMLParagraphElement | null)[]>([]);
-  const { playScene } = useAudio();
+  const { playScene, stopScene } = useAudio();
   const triggered = useRef(false);
 
   const interludeLines = ["Six flowers.", "Six portraits.", "One language."];
@@ -50,14 +50,16 @@ export default function Scene05_Interlude({ nextSong }: Props) {
         onEnter: () => {
           if (triggered.current) return;
           triggered.current = true;
-          // Fade out current audio for 1.2s silence, then start next song
-          setTimeout(() => playScene(nextSong), 1200);
+          // Hard fade-out current song immediately (500ms),
+          // then hold ~1.2s of genuine silence before the next track lifts in.
+          stopScene(500);
+          setTimeout(() => playScene(nextSong), 1700);
         },
       });
     }, sectionRef);
 
     return () => ctx.revert();
-  }, [nextSong, playScene]);
+  }, [nextSong, playScene, stopScene]);
 
   return (
     <section

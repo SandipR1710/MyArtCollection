@@ -4,6 +4,7 @@ import { useEffect, useRef } from "react";
 import { motion, useInView } from "framer-motion";
 import { useAudio } from "@/components/providers/AudioProvider";
 import { usePortraitSize } from "@/hooks/usePortraitSize";
+import InkReveal, { type InkRevealHandle } from "@/components/shared/InkReveal";
 import type { PortraitScene } from "@/data/scenes";
 
 // Hue hints per gallery portrait — subtle scene color shifts
@@ -26,6 +27,7 @@ export default function Scene02_Gallery({ portraits, sceneIndex }: Props) {
 
 function PortraitScene({ portrait, hue }: { portrait: PortraitScene; hue: number }) {
   const ref = useRef<HTMLDivElement>(null);
+  const inkRef = useRef<InkRevealHandle>(null);
   const { w, h } = usePortraitSize(420, 540, 0.82);
   const { playScene, currentSong } = useAudio();
   const isInView = useInView(ref, { once: true, margin: "-25%" });
@@ -36,6 +38,9 @@ function PortraitScene({ portrait, hue }: { portrait: PortraitScene; hue: number
     played.current = true;
     if (currentSong !== portrait.song) playScene(portrait.song);
     document.documentElement.style.setProperty("--scene-h", String(hue));
+    // Ink-reveal the portrait organically once it enters view
+    const t = setTimeout(() => inkRef.current?.reveal(2000), 550);
+    return () => clearTimeout(t);
   }, [isInView, currentSong, playScene, portrait.song, hue]);
 
   return (
@@ -75,6 +80,8 @@ function PortraitScene({ portrait, hue }: { portrait: PortraitScene; hue: number
             className="w-full h-full object-cover rounded-[2px]"
             style={{ display: "block" }}
           />
+          {/* Ink-wash reveal — draws the portrait organically */}
+          <InkReveal ref={inkRef} width={Math.round(w)} height={Math.round(h)} />
           {/* Corner accent marks */}
           <span className="absolute top-2 left-2 w-4 h-4 border-t border-l border-white/20 rounded-tl-sm z-10" />
           <span className="absolute top-2 right-2 w-4 h-4 border-t border-r border-white/20 rounded-tr-sm z-10" />

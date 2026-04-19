@@ -1,6 +1,3 @@
-"use client";
-
-import { useState } from "react";
 import Scene00_Entrance from "@/components/scenes/Scene00_Entrance";
 import Scene01_Favorite from "@/components/scenes/Scene01_Favorite";
 import Scene02_Gallery from "@/components/scenes/Scene02_Gallery";
@@ -20,12 +17,10 @@ const gallerySection3 = galleryPortraits.slice(6, 8);
 const INTERLUDE_NEXT_SONG = duetsData[0].song; // Tum Ho Toh
 
 export default function Home() {
-  const [started, setStarted] = useState(false);
-
   return (
     <main>
-      {/* Scene 0 — Entrance overlay (unmounts after "Begin") */}
-      {!started && <Scene00_Entrance onBegin={() => setStarted(true)} />}
+      {/* Scene 0 — Entrance (scroll scene, not a modal) */}
+      <Scene00_Entrance />
 
       {/* Scene 1 — Favorite portrait + poem (pinned) */}
       <Scene01_Favorite />

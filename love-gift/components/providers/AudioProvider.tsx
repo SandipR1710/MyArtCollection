@@ -5,6 +5,7 @@ import { Howl } from "howler";
 
 interface AudioContextValue {
   playScene: (songSrc: string) => void;
+  stopScene: (fadeMs?: number) => void;
   muted: boolean;
   toggleMute: () => void;
   currentSong: string | null;
@@ -13,6 +14,7 @@ interface AudioContextValue {
 
 const AudioCtx = createContext<AudioContextValue>({
   playScene: () => {},
+  stopScene: () => {},
   muted: false,
   toggleMute: () => {},
   currentSong: null,
@@ -96,6 +98,18 @@ export default function AudioProvider({ children }: { children: React.ReactNode 
     [setupAnalyser]
   );
 
+  const stopScene = useCallback((fadeMs = 500) => {
+    const prev = howlRef.current;
+    if (prev) {
+      prev.fade(prev.volume(), 0, fadeMs);
+      setTimeout(() => prev.unload(), fadeMs + 100);
+    }
+    howlRef.current = null;
+    currentSrcRef.current = null;
+    // Intentionally leave currentSong state alone so the ambient orb
+    // stays visible during a deliberate silence.
+  }, []);
+
   const toggleMute = useCallback(() => {
     setMuted((m) => {
       const next = !m;
@@ -108,7 +122,7 @@ export default function AudioProvider({ children }: { children: React.ReactNode 
   useEffect(() => () => { howlRef.current?.unload(); }, []);
 
   return (
-    <AudioCtx.Provider value={{ playScene, muted, toggleMute, currentSong, analyserNode }}>
+    <AudioCtx.Provider value={{ playScene, stopScene, muted, toggleMute, currentSong, analyserNode }}>
       {children}
     </AudioCtx.Provider>
   );

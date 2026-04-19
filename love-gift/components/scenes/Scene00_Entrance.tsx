@@ -13,12 +13,8 @@ const FLOWER_PATH =
 const OVAL_PATH =
   "M100,12 C138,12 165,45 165,88 C165,131 138,168 100,168 C62,168 35,131 35,88 C35,45 62,12 100,12 Z";
 
-interface Props {
-  onBegin: () => void;
-}
-
-export default function Scene00_Entrance({ onBegin }: Props) {
-  const containerRef = useRef<HTMLDivElement>(null);
+export default function Scene00_Entrance() {
+  const containerRef = useRef<HTMLElement>(null);
   const titleRef    = useRef<HTMLHeadingElement>(null);
   const btnRef      = useRef<HTMLButtonElement>(null);
   const imgWrapRef  = useRef<HTMLDivElement>(null);
@@ -51,15 +47,21 @@ export default function Scene00_Entrance({ onBegin }: Props) {
 
   const handleBegin = () => {
     playScene(favoritePortrait.song);
-    gsap.to(containerRef.current, {
-      opacity: 0, duration: 0.85, ease: "power2.in", onComplete: onBegin,
-    });
+    // Smooth-scroll past the entrance into Scene 1
+    const target = window.innerHeight;
+    if (window.__lenis) {
+      window.__lenis.scrollTo(target, { duration: 1.8 });
+    } else {
+      window.scrollTo({ top: target, behavior: "smooth" });
+    }
   };
 
   return (
-    <div
+    <section
       ref={containerRef}
-      className="fixed inset-0 z-50 bg-[#06080d] flex flex-col items-center justify-center gap-10 px-6"
+      className="relative flex flex-col items-center justify-center gap-10 px-6"
+      style={{ minHeight: "100vh", background: "var(--background)" }}
+      aria-label="Entrance"
     >
       {/* Portrait + morph ring — natural flow, not absolute */}
       <div ref={imgWrapRef} className="relative flex-shrink-0" style={{ opacity: 0 }}>
@@ -120,6 +122,6 @@ export default function Scene00_Entrance({ onBegin }: Props) {
         />
         <span className="relative">Begin</span>
       </button>
-    </div>
+    </section>
   );
 }
