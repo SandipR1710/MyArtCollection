@@ -53,7 +53,6 @@ export default function Scene01_Favorite() {
     <section
       ref={sectionRef}
       className="relative"
-      style={{ height: "280vh" }}
       aria-label="Featured portrait"
     >
       <div ref={pinRef} className="scene-pin w-full">

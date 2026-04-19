@@ -117,18 +117,28 @@ html.lenis, html.lenis body {
 /* ─── Ambient orb ────────────────────────────────────────────────────── */
 .ambient-orb {
   position: fixed;
-  bottom: 1.75rem;
-  right: 1.75rem;
+  bottom: 1rem;
+  right: 1rem;
   z-index: 100;
-  width: 88px;
-  height: 88px;
+  width: 64px;
+  height: 64px;
   cursor: pointer;
   border-radius: 50%;
   filter: drop-shadow(0 0 14px hsla(220, 65%, 60%, 0.35));
-  transition: filter 0.6s ease;
+  transition: filter 0.6s ease, opacity 0.6s ease;
+  opacity: 0.85;
 }
 .ambient-orb:hover {
   filter: drop-shadow(0 0 22px hsla(220, 65%, 70%, 0.55));
+  opacity: 1;
+}
+@media (min-width: 768px) {
+  .ambient-orb {
+    bottom: 1.75rem;
+    right: 1.75rem;
+    width: 82px;
+    height: 82px;
+  }
 }
 
 /* ─── Poem / handwriting text ────────────────────────────────────────── */

@@ -1,17 +1,15 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef } from "react";
 import { useAudio } from "@/components/providers/AudioProvider";
 
 export default function AmbientOrb() {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const rafRef = useRef<number>(0);
   const { muted, toggleMute, analyserNode, currentSong } = useAudio();
-  const [hovered, setHovered] = useState(false);
 
-  const songName = currentSong
-    ? currentSong.split("/").pop()!.replace(".mp3", "").replace(/_/g, " ")
-    : null;
+  // Only render orb after the experience has begun (a song is playing)
+  const visible = currentSong !== null;
 
   // Re-run whenever analyserNode or muted changes
   useEffect(() => {
@@ -83,11 +81,11 @@ export default function AmbientOrb() {
     return () => cancelAnimationFrame(rafRef.current);
   }, [analyserNode, muted]);
 
+  if (!visible) return null;
+
   return (
     <div
       className="ambient-orb"
-      onMouseEnter={() => setHovered(true)}
-      onMouseLeave={() => setHovered(false)}
       onClick={toggleMute}
       role="button"
       aria-label={muted ? "Unmute music" : "Mute music"}
@@ -95,16 +93,6 @@ export default function AmbientOrb() {
       onKeyDown={(e) => { if (e.key === "Enter" || e.key === " ") toggleMute(); }}
     >
       <canvas ref={canvasRef} className="w-full h-full" />
-
-      {hovered && songName && (
-        <div
-          className="absolute bottom-full right-0 mb-2 px-3 py-1.5 bg-black/70 backdrop-blur-sm rounded-lg text-xs text-white/80 whitespace-nowrap pointer-events-none"
-          style={{ fontFamily: "var(--font-cormorant), serif", fontSize: "0.85rem" }}
-        >
-          {songName}
-          <span className="ml-2 opacity-40">{muted ? "muted" : "♪"}</span>
-        </div>
-      )}
     </div>
   );
 }

@@ -62,8 +62,14 @@ export default function AudioProvider({ children }: { children: React.ReactNode 
     }
   }, []);
 
+  const currentSrcRef = useRef<string | null>(null);
+
   const playScene = useCallback(
     (songSrc: string) => {
+      // Skip if already playing this song (prevents pool exhaustion on rapid scroll)
+      if (currentSrcRef.current === songSrc) return;
+      currentSrcRef.current = songSrc;
+
       // Fade out previous
       if (howlRef.current) {
         const prev = howlRef.current;
