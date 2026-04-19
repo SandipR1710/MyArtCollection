@@ -1,11 +1,15 @@
 "use client";
 
 import { useEffect, useRef } from "react";
+import { gsap } from "gsap";
+import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { motion, useInView } from "framer-motion";
 import { useAudio } from "@/components/providers/AudioProvider";
 import { usePortraitSize } from "@/hooks/usePortraitSize";
 import InkReveal, { type InkRevealHandle } from "@/components/shared/InkReveal";
 import type { PortraitScene } from "@/data/scenes";
+
+gsap.registerPlugin(ScrollTrigger);
 
 // Hue hints per gallery portrait — subtle scene color shifts
 const HUE_HINTS = [200, 180, 250, 210, 270, 20, 340, 40];
@@ -30,18 +34,31 @@ function PortraitScene({ portrait, hue }: { portrait: PortraitScene; hue: number
   const inkRef = useRef<InkRevealHandle>(null);
   const { w, h } = usePortraitSize(420, 540, 0.82);
   const { playScene, currentSong } = useAudio();
-  const isInView = useInView(ref, { once: true, margin: "-25%" });
+  // useInView only drives the quote/frame Framer Motion entrance (non-critical)
+  const isInView = useInView(ref, { once: true, margin: "-5%" });
   const played = useRef(false);
 
+  // GSAP ScrollTrigger for ink reveal — synced to Lenis so it fires reliably.
+  // playScene has built-in dedup, so no need to check currentSong here.
   useEffect(() => {
-    if (!isInView || played.current) return;
-    played.current = true;
-    if (currentSong !== portrait.song) playScene(portrait.song);
-    document.documentElement.style.setProperty("--scene-h", String(hue));
-    // Ink-reveal the portrait organically once it enters view
-    const t = setTimeout(() => inkRef.current?.reveal(2000), 550);
-    return () => clearTimeout(t);
-  }, [isInView, currentSong, playScene, portrait.song, hue]);
+    const ctx = gsap.context(() => {
+      ScrollTrigger.create({
+        trigger: ref.current,
+        start: "top 85%",
+        once: true,
+        onEnter: () => {
+          if (played.current) return;
+          played.current = true;
+          playScene(portrait.song);
+          document.documentElement.style.setProperty("--scene-h", String(hue));
+          setTimeout(() => inkRef.current?.reveal(2200), 80);
+        },
+      });
+    });
+    return () => ctx.revert();
+  // portrait.song, playScene, and hue are stable; GSAP ctx manages cleanup
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   return (
     <div
@@ -59,11 +76,11 @@ function PortraitScene({ portrait, hue }: { portrait: PortraitScene; hue: number
       />
 
       <div className="relative flex flex-col items-center gap-8 px-4">
-        {/* Portrait frame */}
+        {/* Portrait frame — only translate, no opacity fade so InkReveal is visible */}
         <motion.div
-          initial={{ opacity: 0, y: 30, scale: 0.96 }}
-          animate={isInView ? { opacity: 1, y: 0, scale: 1 } : {}}
-          transition={{ duration: 1.4, ease: [0.22, 1, 0.36, 1] }}
+          initial={{ y: 28 }}
+          animate={isInView ? { y: 0 } : {}}
+          transition={{ duration: 0.8, ease: [0.22, 1, 0.36, 1] }}
           className="portrait-wrap relative"
           style={{ width: w, height: h }}
         >

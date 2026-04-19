@@ -141,18 +141,27 @@ export default function Scene06_Duet({ duet }: Props) {
         </div>
 
         {/* Portrait with ink reveal */}
-        <div
-          ref={portraitWrapRef}
-          className="portrait-wrap relative"
-          style={{ width: PORTRAIT_W, height: PORTRAIT_H, opacity: 0 }}
-        >
-          {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img
-            src={duet.portraitSrc}
-            alt={duet.altPortrait}
-            className="w-full h-full object-cover rounded-[1px]"
+        <div className="relative flex items-center justify-center" style={{ opacity: 0 }} ref={portraitWrapRef}>
+          {/* Hue-matched ink-cloud glow — same treatment as gallery portraits */}
+          <div
+            className="absolute pointer-events-none"
+            style={{
+              inset: "-30%",
+              background: `radial-gradient(ellipse 65% 60% at 50% 48%, hsla(${duet.palette},45%,22%,0.55) 0%, transparent 70%)`,
+            }}
           />
-          <InkReveal ref={inkRef} width={PORTRAIT_W} height={PORTRAIT_H} />
+          <div
+            className="portrait-wrap relative"
+            style={{ width: PORTRAIT_W, height: PORTRAIT_H }}
+          >
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img
+              src={duet.portraitSrc}
+              alt={duet.altPortrait}
+              className="w-full h-full object-cover rounded-[1px]"
+            />
+            <InkReveal ref={inkRef} width={PORTRAIT_W} height={PORTRAIT_H} />
+          </div>
         </div>
       </div>
     </section>

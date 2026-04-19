@@ -38,7 +38,7 @@ export default function Scene13_Outro() {
               <motion.div
                 key={src + i}
                 initial={{ opacity: 0, scale: 0 }}
-                whileInView={{ opacity: 0.7, scale: 1 }}
+                whileInView={{ opacity: 0.85, scale: 1 }}
                 transition={{ duration: 0.6, delay: 0.2 + i * 0.06, ease: "backOut" }}
                 viewport={{ once: true }}
                 className="absolute rounded-full overflow-hidden"
@@ -47,6 +47,7 @@ export default function Scene13_Outro() {
                   height: size,
                   left: `calc(50% + ${Math.cos(angle) * r}px - ${size / 2}px)`,
                   top: `calc(50% + ${Math.sin(angle) * r}px - ${size / 2}px)`,
+                  boxShadow: "0 0 0 1.5px rgba(255,255,255,0.13), 0 2px 10px rgba(0,0,0,0.55)",
                 }}
               >
                 {/* eslint-disable-next-line @next/next/no-img-element */}
