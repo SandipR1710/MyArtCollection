@@ -104,17 +104,12 @@ export default function Scene00_Entrance() {
         I drew this world for you
       </h1>
 
-      {/* Begin button — solid pill, clearly visible */}
+      {/* Begin button — real visible border, not box-shadow trick */}
       <button
         ref={btnRef}
         onClick={handleBegin}
-        style={{
-          opacity: 0,
-          background: "rgba(255,255,255,0.07)",
-          boxShadow: "0 0 0 1.5px rgba(255,255,255,0.55), 0 0 32px hsla(220,65%,65%,0.25), inset 0 1px 0 rgba(255,255,255,0.10)",
-          backdropFilter: "blur(6px)",
-        }}
-        className="px-14 py-4 rounded-full text-sm tracking-[0.32em] uppercase font-light text-white hover:bg-white/14 transition-all duration-400"
+        style={{ opacity: 0 }}
+        className="px-12 py-[18px] rounded-full text-sm tracking-[0.38em] uppercase font-light text-white border border-white/65 bg-white/5 hover:bg-white/12 hover:border-white/90 transition-all duration-400"
       >
         Begin
       </button>

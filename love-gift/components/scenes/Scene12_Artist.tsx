@@ -20,18 +20,17 @@ const allPortraits = [
   ...duetsData.map((d) => ({ src: d.portraitSrc, alt: d.altPortrait })),
 ];
 
-const DOT_SIZE    = 42;
-const CENTER_SIZE = 128;
-const PAD         = DOT_SIZE / 2 + 8;
+const DOT_SIZE    = 40;
+const PAD         = DOT_SIZE / 2 + 14; // extra clearance so dots never clip
 
-function buildLayout(rx: number, ry: number) {
+function buildLayout(rx: number, ry: number, centerSize: number) {
   const positions = allPortraits.map((_, i) => {
     const angle = (i / allPortraits.length) * Math.PI * 2 - Math.PI / 2;
     return { x: rx * Math.cos(angle), y: ry * Math.sin(angle) };
   });
   const cx = rx + PAD;
   const cy = ry + PAD;
-  return { positions, cx, cy, w: cx * 2, h: cy * 2 };
+  return { positions, cx, cy, w: cx * 2, h: cy * 2, centerSize };
 }
 
 export default function Scene12_Artist() {
@@ -43,16 +42,19 @@ export default function Scene12_Artist() {
   const played = useRef(false);
 
   // Responsive constellation radii
-  const [layout, setLayout] = useState(() => buildLayout(180, 150));
+  const [layout, setLayout] = useState(() => buildLayout(180, 150, 116));
 
   useEffect(() => {
     const compute = () => {
       const vw = typeof window !== "undefined" ? window.innerWidth : 800;
-      // Reserve ~90px on right for the ambient orb; keep within safe viewport width
+      const isMobile = vw < 640;
+      // Reserve 90px on right for ambient orb
       const safe = vw - 90;
-      const rx = Math.min(190, safe * 0.36);
-      const ry = Math.min(160, safe * 0.34);
-      setLayout(buildLayout(rx, ry));
+      const rx = Math.min(isMobile ? 130 : 200, safe * (isMobile ? 0.34 : 0.38));
+      const ry = Math.min(isMobile ? 120 : 170, safe * (isMobile ? 0.32 : 0.36));
+      // Center photo scales with the ring so it never crowds the thumbnails
+      const centerSize = isMobile ? 96 : 120;
+      setLayout(buildLayout(rx, ry, centerSize));
     };
     compute();
     window.addEventListener("resize", compute);
@@ -94,7 +96,7 @@ export default function Scene12_Artist() {
     return () => ctx.revert();
   }, [isInView, playScene]);
 
-  const { positions, cx, cy, w: SVG_W, h: SVG_H } = layout;
+  const { positions, cx, cy, w: SVG_W, h: SVG_H, centerSize } = layout;
 
   return (
     <section
@@ -106,7 +108,7 @@ export default function Scene12_Artist() {
       {/* Constellation: SVG lines + portrait thumbnails */}
       <div
         className="relative"
-        style={{ width: SVG_W, height: SVG_H, maxWidth: "100vw" }}
+        style={{ width: SVG_W, height: SVG_H }}
       >
         {/* SVG lines */}
         <svg
@@ -165,8 +167,8 @@ export default function Scene12_Artist() {
             left: "50%",
             top: "50%",
             transform: "translate(-50%, -50%)",
-            width: CENTER_SIZE,
-            height: CENTER_SIZE,
+            width: centerSize,
+            height: centerSize,
             boxShadow: "0 0 0 2px hsla(220,40%,60%,0.35), 0 0 40px 8px hsla(220,60%,50%,0.25)",
           }}
         >
