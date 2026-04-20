@@ -104,14 +104,15 @@ export default function Scene00_Entrance() {
         I drew this world for you
       </h1>
 
-      {/* Begin button — real visible border, not box-shadow trick */}
+      {/* Begin button */}
       <button
         ref={btnRef}
         onClick={handleBegin}
         style={{ opacity: 0 }}
-        className="px-12 py-[18px] rounded-full text-sm tracking-[0.38em] uppercase font-light text-white border border-white/65 bg-white/5 hover:bg-white/12 hover:border-white/90 transition-all duration-400"
+        className="px-16 py-5 rounded-full text-base font-light text-white border border-white/65 bg-white/5 hover:bg-white/12 hover:border-white/90 transition-all duration-400"
       >
-        Begin
+        {/* paddingLeft compensates for letter-spacing on last char so text looks centered */}
+        <span style={{ letterSpacing: "0.35em", paddingLeft: "0.35em" }}>Begin</span>
       </button>
     </section>
   );
