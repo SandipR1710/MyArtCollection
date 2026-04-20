@@ -48,9 +48,10 @@ export default function Scene12_Artist() {
   useEffect(() => {
     const compute = () => {
       const vw = typeof window !== "undefined" ? window.innerWidth : 800;
-      // On mobile, shrink radii so constellation fits without clipping
-      const rx = Math.min(200, vw * 0.40);
-      const ry = Math.min(170, vw * 0.38);
+      // Reserve ~90px on right for the ambient orb; keep within safe viewport width
+      const safe = vw - 90;
+      const rx = Math.min(190, safe * 0.36);
+      const ry = Math.min(160, safe * 0.34);
       setLayout(buildLayout(rx, ry));
     };
     compute();
@@ -99,7 +100,7 @@ export default function Scene12_Artist() {
     <section
       ref={sectionRef}
       className="relative flex flex-col items-center justify-center py-20 overflow-hidden"
-      style={{ background: "var(--background)" }}
+      style={{ background: "var(--background)", minHeight: "100vh" }}
       aria-label="The artist"
     >
       {/* Constellation: SVG lines + portrait thumbnails */}

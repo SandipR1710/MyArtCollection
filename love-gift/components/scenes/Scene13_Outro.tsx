@@ -4,12 +4,15 @@ import { motion } from "framer-motion";
 import { favoritePortrait, galleryPortraits } from "@/data/scenes";
 import { duetsData } from "@/data/duets";
 
-// All 14 portrait thumbnails (favorite + gallery + duet portraits)
-const allThumbs = [
-  favoritePortrait.src,
-  ...galleryPortraits.map((p) => p.src),
-  ...duetsData.map((d) => d.portraitSrc),
-];
+// All unique portrait thumbnails — deduplicate since img.jpeg appears in both
+// gallery and duets (Wild Rose), giving exactly 14 unique portraits.
+const allThumbs = Array.from(
+  new Set([
+    favoritePortrait.src,
+    ...galleryPortraits.map((p) => p.src),
+    ...duetsData.map((d) => d.portraitSrc),
+  ])
+);
 
 export default function Scene13_Outro() {
   return (

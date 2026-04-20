@@ -104,24 +104,19 @@ export default function Scene00_Entrance() {
         I drew this world for you
       </h1>
 
-      {/* Begin button */}
+      {/* Begin button — solid pill, clearly visible */}
       <button
         ref={btnRef}
         onClick={handleBegin}
-        style={{ opacity: 0 }}
-        className="group relative px-12 py-3.5 text-sm tracking-[0.3em] uppercase font-light text-white/90 hover:text-white transition-all duration-500 overflow-hidden"
+        style={{
+          opacity: 0,
+          background: "rgba(255,255,255,0.07)",
+          boxShadow: "0 0 0 1.5px rgba(255,255,255,0.55), 0 0 32px hsla(220,65%,65%,0.25), inset 0 1px 0 rgba(255,255,255,0.10)",
+          backdropFilter: "blur(6px)",
+        }}
+        className="px-14 py-4 rounded-full text-sm tracking-[0.32em] uppercase font-light text-white hover:bg-white/14 transition-all duration-400"
       >
-        {/* Glow border */}
-        <span
-          className="absolute inset-0 rounded-full border border-white/40 group-hover:border-white/80 transition-all duration-500"
-          style={{ boxShadow: "0 0 20px 1px hsla(220,60%,65%,0.20), inset 0 0 8px rgba(255,255,255,0.03)" }}
-        />
-        {/* Hover glow fill */}
-        <span
-          className="absolute inset-0 rounded-full opacity-0 group-hover:opacity-100 transition-opacity duration-500"
-          style={{ background: "radial-gradient(ellipse at 50% 110%, hsla(220,60%,55%,0.22) 0%, transparent 65%)" }}
-        />
-        <span className="relative">Begin</span>
+        Begin
       </button>
     </section>
   );
