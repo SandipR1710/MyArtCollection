@@ -155,7 +155,7 @@ export default function Scene12_Artist() {
           </motion.div>
         ))}
 
-        {/* Artist photo — circular center matching thumbnail style */}
+        {/* Artist photo — anchored to (cx,cy) to stay concentric with SVG lines */}
         <motion.div
           initial={{ opacity: 0, scale: 0.7 }}
           whileInView={{ opacity: 1, scale: 1 }}
@@ -164,9 +164,8 @@ export default function Scene12_Artist() {
           className="relative z-10 rounded-full overflow-hidden"
           style={{
             position: "absolute",
-            left: "50%",
-            top: "50%",
-            transform: "translate(-50%, -50%)",
+            left: cx - centerSize / 2,
+            top:  cy - centerSize / 2,
             width: centerSize,
             height: centerSize,
             boxShadow: "0 0 0 2px hsla(220,40%,60%,0.35), 0 0 40px 8px hsla(220,60%,50%,0.25)",
