@@ -72,11 +72,11 @@ export default function Scene05_Interlude({ nextSong }: Props) {
           <p
             key={text}
             ref={(el) => { linesRef.current[i] = el; }}
-            className="interlude-line text-white/80"
+            className="interlude-line text-white/85"
             style={{
-              fontSize: `clamp(${1.8 + i * 0.8}rem, ${3 + i * 1.5}vw, ${3.5 + i * 1.5}rem)`,
+              fontSize: ["clamp(1.8rem, 3vw, 2.8rem)", "clamp(2.4rem, 4.2vw, 3.8rem)", "clamp(3rem, 5.5vw, 5rem)"][i],
               fontWeight: 300,
-              letterSpacing: "0.1em",
+              letterSpacing: i === 2 ? "0.18em" : "0.1em",
             }}
           >
             {text}

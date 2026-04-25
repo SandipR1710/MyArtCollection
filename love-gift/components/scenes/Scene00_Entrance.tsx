@@ -98,8 +98,8 @@ export default function Scene00_Entrance() {
       {/* Title */}
       <h1
         ref={titleRef}
-        className="entrance-title text-center"
-        style={{ opacity: 0, fontSize: "clamp(1.6rem, 5vw, 3.8rem)" }}
+        className="entrance-title"
+        style={{ opacity: 0 }}
       >
         I drew this world for you
       </h1>

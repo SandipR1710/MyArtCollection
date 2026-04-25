@@ -28,7 +28,7 @@ export default function Scene13_Outro() {
         className="flex flex-col items-center gap-10"
       >
         {/* Petal-flower mosaic — all portraits in rose pattern */}
-        <div className="relative w-64 h-64" aria-hidden="true">
+        <div className="relative" style={{ width: "min(76vw, 260px)", height: "min(76vw, 260px)" }} aria-hidden="true">
           {allThumbs.map((src, i) => {
             // Two concentric rings for 14 thumbnails (7 outer + 7 inner)
             const isOuter = i % 2 === 0;

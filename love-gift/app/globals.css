@@ -51,12 +51,12 @@ html.lenis, html.lenis body {
   overscroll-behavior: contain;
 }
 
-/* ─── Scene background gradient ─────────────────────────────────────── */
+/* ─── Scene background gradient — rich cinematic dark jewel tones ─── */
 .scene-bg {
   background: radial-gradient(
-    ellipse 140% 90% at 50% 0%,
-    hsl(var(--scene-h), 28%, 13%) 0%,
-    hsl(var(--scene-h), 10%, 7%) 55%,
+    ellipse 130% 85% at 50% -8%,
+    hsl(var(--scene-h), 38%, 16%) 0%,
+    hsl(var(--scene-h), 20%, 10%) 42%,
     var(--background) 100%
   );
 }
@@ -70,7 +70,6 @@ html.lenis, html.lenis body {
 }
 
 @supports not (transition: --scene-h 1s) {
-  /* Fallback for browsers without custom property transitions */
   .scene-bg { transition: none; }
 }
 
@@ -80,7 +79,7 @@ html.lenis, html.lenis body {
   display: inline-block;
 }
 
-/* Vignette: darken portrait edges so they dissolve into dark background */
+/* Vignette: dissolve portrait edges into dark background */
 .portrait-wrap::before {
   content: "";
   position: absolute;
@@ -89,9 +88,9 @@ html.lenis, html.lenis body {
   pointer-events: none;
   border-radius: inherit;
   background: radial-gradient(
-    ellipse 85% 85% at 50% 45%,
-    transparent 40%,
-    rgba(6, 8, 13, 0.55) 100%
+    ellipse 80% 80% at 50% 45%,
+    transparent 36%,
+    rgba(6, 8, 13, 0.65) 100%
   );
 }
 .portrait-wrap::after {
@@ -114,7 +113,7 @@ html.lenis, html.lenis body {
   border-radius: inherit;
 }
 
-/* ─── Ambient orb ────────────────────────────────────────────────────── */
+/* ─── Ambient orb — hue follows --scene-h ────────────────────────────── */
 .ambient-orb {
   position: fixed;
   bottom: 1rem;
@@ -124,12 +123,12 @@ html.lenis, html.lenis body {
   height: 64px;
   cursor: pointer;
   border-radius: 50%;
-  filter: drop-shadow(0 0 14px hsla(220, 65%, 60%, 0.35));
-  transition: filter 0.6s ease, opacity 0.6s ease;
+  filter: drop-shadow(0 0 14px hsla(var(--scene-h), 65%, 60%, 0.4));
+  transition: filter 0.8s ease, opacity 0.6s ease;
   opacity: 0.85;
 }
 .ambient-orb:hover {
-  filter: drop-shadow(0 0 22px hsla(220, 65%, 70%, 0.55));
+  filter: drop-shadow(0 0 26px hsla(var(--scene-h), 65%, 72%, 0.7));
   opacity: 1;
 }
 @media (min-width: 768px) {
@@ -144,8 +143,8 @@ html.lenis, html.lenis body {
 /* ─── Poem / handwriting text ────────────────────────────────────────── */
 .poem-line {
   font-family: var(--font-caveat), cursive;
-  font-size: clamp(1.4rem, 3vw, 2.2rem);
-  line-height: 1.5;
+  font-size: clamp(1.6rem, 3.5vw, 2.5rem);
+  line-height: 1.6;
   color: var(--foreground);
   opacity: 0;
 }
@@ -177,12 +176,25 @@ html.lenis, html.lenis body {
 /* ─── Entrance title ─────────────────────────────────────────────────── */
 .entrance-title {
   font-family: var(--font-cormorant), Georgia, serif;
-  font-size: clamp(2rem, 6vw, 5rem);
+  font-size: clamp(2.2rem, 6.5vw, 5.5rem);
   font-weight: 300;
   letter-spacing: 0.08em;
   text-align: center;
   color: var(--foreground);
-  line-height: 1.2;
+  line-height: 1.15;
+}
+
+/* ─── Typing cursor — blinks after artist message ────────────────────── */
+.typing-cursor::after {
+  content: "|";
+  animation: blink-cursor 1.1s step-end infinite;
+  opacity: 1;
+  margin-left: 1px;
+  color: hsla(var(--scene-h), 70%, 70%, 0.8);
+}
+@keyframes blink-cursor {
+  0%, 100% { opacity: 1; }
+  50%       { opacity: 0; }
 }
 
 /* ─── Vine / connector SVG ───────────────────────────────────────────── */
@@ -222,15 +234,13 @@ html.lenis, html.lenis body {
 /* ─── Artist constellation ───────────────────────────────────────────── */
 .constellation-dot {
   position: absolute;
-  width: 60px;
-  height: 60px;
   border-radius: 50%;
   overflow: hidden;
   cursor: pointer;
   transition: transform 0.3s ease, box-shadow 0.3s ease;
 }
 .constellation-dot:hover {
-  transform: scale(1.3);
+  transform: scale(1.35);
   box-shadow: 0 0 20px var(--glow-color);
 }
 
@@ -243,11 +253,11 @@ html.lenis, html.lenis body {
   transform: translateY(20px);
 }
 
-/* ─── Reduce motion fallback ─────────────────────────────────────────── */
+/* ─── Reduce motion — slow down rather than eliminate ────────────────── */
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after {
-    animation-duration: 0.01ms !important;
+    animation-duration: 0.4s !important;
     animation-iteration-count: 1 !important;
-    transition-duration: 0.01ms !important;
+    transition-duration: 0.4s !important;
   }
 }

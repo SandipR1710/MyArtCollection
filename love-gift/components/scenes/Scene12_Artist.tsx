@@ -74,6 +74,8 @@ export default function Scene12_Artist() {
         text: { value: artistMessage, delimiter: "" },
         ease: "none",
         delay: 2.2,
+        onStart: () => messageRef.current?.classList.add("typing-cursor"),
+        onComplete: () => messageRef.current?.classList.remove("typing-cursor"),
       });
 
       // Draw constellation lines one by one
@@ -126,9 +128,9 @@ export default function Scene12_Artist() {
               d={`M ${cx} ${cy} L ${cx + p.x} ${cy + p.y}`}
               className="constellation-line"
               fill="none"
-              stroke="hsl(220, 40%, 55%)"
-              strokeWidth="0.6"
-              opacity="0.35"
+              stroke="hsl(var(--scene-h), 45%, 60%)"
+              strokeWidth="0.85"
+              opacity="0.55"
             />
           ))}
         </svg>
@@ -184,10 +186,10 @@ export default function Scene12_Artist() {
       <div className="mt-12 max-w-xl mx-auto px-6 text-center">
         <p
           ref={messageRef}
-          className="text-white/70 leading-relaxed"
+          className="text-white/80 leading-relaxed"
           style={{
             fontFamily: "var(--font-cormorant), serif",
-            fontSize: "clamp(1rem, 1.8vw, 1.2rem)",
+            fontSize: "clamp(1.1rem, 2vw, 1.4rem)",
             fontStyle: "italic",
             minHeight: "6em",
           }}

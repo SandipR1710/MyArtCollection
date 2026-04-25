@@ -100,10 +100,10 @@ function PortraitScene({ portrait, hue }: { portrait: PortraitScene; hue: number
           {/* Ink-wash reveal — draws the portrait organically */}
           <InkReveal ref={inkRef} width={Math.round(w)} height={Math.round(h)} />
           {/* Corner accent marks */}
-          <span className="absolute top-2 left-2 w-4 h-4 border-t border-l border-white/20 rounded-tl-sm z-10" />
-          <span className="absolute top-2 right-2 w-4 h-4 border-t border-r border-white/20 rounded-tr-sm z-10" />
-          <span className="absolute bottom-2 left-2 w-4 h-4 border-b border-l border-white/20 rounded-bl-sm z-10" />
-          <span className="absolute bottom-2 right-2 w-4 h-4 border-b border-r border-white/20 rounded-br-sm z-10" />
+          <span className="absolute top-2 left-2 w-5 h-5 border-t border-l border-white/35 rounded-tl-sm z-10" />
+          <span className="absolute top-2 right-2 w-5 h-5 border-t border-r border-white/35 rounded-tr-sm z-10" />
+          <span className="absolute bottom-2 left-2 w-5 h-5 border-b border-l border-white/35 rounded-bl-sm z-10" />
+          <span className="absolute bottom-2 right-2 w-5 h-5 border-b border-r border-white/35 rounded-br-sm z-10" />
         </motion.div>
 
         {/* Floating quote — always shown (fallback for portraits without quotes) */}
@@ -114,28 +114,21 @@ function PortraitScene({ portrait, hue }: { portrait: PortraitScene; hue: number
           className="text-center px-4"
           style={{ maxWidth: Math.min(w + 40, 520) }}
         >
-          {portrait.quote ? (
+          {portrait.quote && (
             <>
               <p
-                className="text-white/70 leading-relaxed"
-                style={{ fontFamily: "var(--font-caveat), cursive", fontSize: "clamp(1.3rem, 2.8vw, 1.9rem)" }}
+                className="text-white/80 leading-relaxed"
+                style={{ fontFamily: "var(--font-caveat), cursive", fontSize: "clamp(1.4rem, 2.8vw, 2rem)" }}
               >
                 {portrait.quote[0]}
               </p>
               <p
-                className="text-white/40 mt-1 leading-relaxed"
-                style={{ fontFamily: "var(--font-caveat), cursive", fontSize: "clamp(1.1rem, 2.2vw, 1.5rem)" }}
+                className="text-white/55 mt-1 leading-relaxed"
+                style={{ fontFamily: "var(--font-caveat), cursive", fontSize: "clamp(1.2rem, 2.4vw, 1.6rem)" }}
               >
                 {portrait.quote[1]}
               </p>
             </>
-          ) : (
-            <p
-              className="text-white/30 leading-relaxed tracking-widest uppercase"
-              style={{ fontFamily: "var(--font-cormorant), serif", fontSize: "0.72rem", letterSpacing: "0.3em" }}
-            >
-              {portrait.song.split("/").pop()!.replace(".mp3", "").replace(/_/g, " ")}
-            </p>
           )}
         </motion.div>
       </div>

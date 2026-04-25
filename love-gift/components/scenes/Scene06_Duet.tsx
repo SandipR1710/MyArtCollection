@@ -108,8 +108,8 @@ export default function Scene06_Duet({ duet }: Props) {
             className="w-full max-w-[380px] h-[min(65vh,500px)] object-cover rounded-[1px]"
           />
           <p
-            className="mt-3 text-center tracking-widest uppercase opacity-50"
-            style={{ fontFamily: "var(--font-caveat), cursive", fontSize: "1.05rem" }}
+            className="mt-3 text-center tracking-widest uppercase opacity-[0.72]"
+            style={{ fontFamily: "var(--font-caveat), cursive", fontSize: "1.1rem" }}
           >
             {duet.flowerName}
           </p>
@@ -129,8 +129,8 @@ export default function Scene06_Duet({ duet }: Props) {
             className="absolute text-center leading-snug"
             style={{
               fontFamily: "var(--font-cormorant), serif",
-              fontSize: "0.68rem",
-              letterSpacing: "0.08em",
+              fontSize: "0.78rem",
+              letterSpacing: "0.1em",
               color: "var(--glow-color)",
               opacity: 0,
               maxWidth: 66,
